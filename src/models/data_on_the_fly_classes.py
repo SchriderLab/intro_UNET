@@ -98,9 +98,13 @@ class DataGenerator(keras.utils.Sequence):
                 for j in range(self.n_chunks):
                     x.append(np.array(self.ifiles[i]['{0}/x_{1}'.format(indices_[i][j], k)]))
                     
-            x = np.vstack(x).reshape(t_shape)
+            x = np.vstack(x)
             
             X.append(x)
+
+        # in the case that n_inputs == 1
+        if len(X) == 1:
+            X = X[0]
 
         if self.y is None:
             y = []
@@ -110,6 +114,8 @@ class DataGenerator(keras.utils.Sequence):
                     y.append(np.array(self.ifiles[i]['{0}/y'.format(indices_[i][j])]))
                     
             y = np.vstack(y)
+
+            y = y.reshape((y.shape[0], y.shape[1], y.shape[2], 1))
         else:
             y = copy.copy(self.y)
                 
