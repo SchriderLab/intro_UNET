@@ -3,10 +3,59 @@ from random import shuffle
 import gzip
 from matplotlib import pyplot as plt
 from sklearn.neighbors import NearestNeighbors
+from scipy.spatial.distance import cdist, pdist
 import json,pprint
+
+from scipy.optimize import linear_sum_assignment
 
 def add_channel(matrix):
     return matrix.reshape(matrix.shape + (1, ))
+
+def min_diff_indices(amat, method = 'min'):
+    mb = NearestNeighbors(len(amat), metric = 'manhattan').fit(amat)
+    v = mb.kneighbors(amat)
+
+    if method == 'min':
+        smallest = np.argmin(v[0].sum(axis=1))
+    elif method == 'max':
+        smallest = np.argmax(v[0].sum(axis=1))
+
+    return v[1][smallest]
+
+def sort_NN(X):
+    X1 = X[: X.shape[0] // 2]
+    X2 = X[X.shape[0] // 2:]
+
+    indices = []
+    indices.extend(min_diff_indices(X1))
+    indices.extend([u + X.shape[0] // 2 for u in min_diff_indices(X2)])
+
+    return X[indices], indices
+
+def sort_cdist(X, metric='cityblock', opt='min', sort_pop=True):
+    X1 = X[: X.shape[0] // 2]
+    X2 = X[X.shape[0] // 2:]
+
+    D = cdist(X1, X2, metric)
+
+    if opt == 'max':
+        D = (D + 0.0001) ** -1
+
+    i, j = linear_sum_assignment(D)
+    coms = dict(zip(i, j))
+
+    if sort_pop:
+        pop1_indices = min_diff_indices(X1)
+    else:
+        pop1_indices = sorted(coms.keys())
+
+    pop2_indices = [coms[u] + (X.shape[0] // 2) for u in pop1_indices]
+
+    indices = list(pop1_indices) + list(pop2_indices)
+
+    X = X[indices]
+
+    return X, indices
 
 def sort_min_diff(amat):
     mb = NearestNeighbors(len(amat), metric='manhattan').fit(amat)
