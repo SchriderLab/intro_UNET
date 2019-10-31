@@ -8,7 +8,7 @@ def parse_args():
     # my args
     parser.add_argument("--verbose", action = "store_true", help = "display messages")
     parser.add_argument("--odir", default = "/proj/dschridelab/introgression_data/")
-    parser.add_argument("--n_jobs", default = "100")
+    parser.add_argument("--n_jobs", default = "1000")
     parser.add_argument("--n_replicates", default = "200000")
 
     args = parser.parse_args()
