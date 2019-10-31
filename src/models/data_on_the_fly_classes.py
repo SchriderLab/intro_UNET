@@ -114,8 +114,6 @@ class DataGenerator(keras.utils.Sequence):
                     y.append(np.array(self.ifiles[i]['{0}/y'.format(indices_[i][j])]))
                     
             y = np.vstack(y)
-
-            y = y.reshape((y.shape[0], y.shape[1], y.shape[2], 1))
         else:
             y = copy.copy(self.y)
                 
