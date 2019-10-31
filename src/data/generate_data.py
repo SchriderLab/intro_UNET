@@ -11,6 +11,8 @@ def parse_args():
     parser.add_argument("--n_jobs", default = "1000")
     parser.add_argument("--n_replicates", default = "200000")
 
+    parser.add_argument("--donor_pop", default = "1")
+
     args = parser.parse_args()
 
     if args.verbose:
@@ -41,14 +43,8 @@ def main():
 
     counter = 0
 
-    # 1 to 2
-    for ix in range(n_jobs // 2):
-        os.system(cmd.format(replicates_per, 1, os.path.join(args.odir, 'sim.{0:06d}.log'.format(counter)), os.path.join(args.odir, 'sim.{0:06d}.ms'.format(counter))))
-        counter += 1
-
-    # 2 to 1
-    for ix in range(n_jobs // 2):
-        os.system(cmd.format(replicates_per, 2, os.path.join(args.odir, 'sim.{0:06d}.log'.format(counter)), os.path.join(args.odir, 'sim.{0:06d}.ms'.format(counter))))
+    for ix in range(n_jobs):
+        os.system(cmd.format(replicates_per, args.donor_pop, os.path.join(args.odir, 'sim.{0:06d}.log'.format(counter)), os.path.join(args.odir, 'sim.{0:06d}.ms'.format(counter))))
         counter += 1
 
 if __name__ == '__main__':
