@@ -28,7 +28,7 @@ from data_on_the_fly_classes import DataGenerator
 from cnn_data_functions import create_data_batch, rm_broken_sims, get_max_snps, get_ids, partition_data, get_partition_indices
 
 from keras.utils import multi_gpu_model
-from keras import backend as k
+from keras import backend as K
 import logging
 from keras.callbacks import TensorBoard
 
@@ -42,6 +42,18 @@ import matplotlib.pyplot as plt
 
 def relu_clipped(x):
     return K.relu(x, max_value=1)
+
+def dice_coef(y_true, y_pred, smooth=1):
+    """
+    Dice = (2*|X & Y|)/ (|X|+ |Y|)
+         =  2*sum(|A*B|)/(sum(A^2)+sum(B^2))
+    ref: https://arxiv.org/pdf/1606.04797v1.pdf
+    """
+    intersection = K.sum(K.abs(y_true * y_pred), axis=-1)
+    return (2. * intersection + smooth) / (K.sum(K.square(y_true),-1) + K.sum(K.square(y_pred),-1) + smooth)
+
+def dice_coef_loss(y_true, y_pred):
+    return 1 - dice_coef(y_true, y_pred)
 
 class TrainValTensorBoard(TensorBoard):
     def __init__(self, log_dir='./logs', **kwargs):
@@ -141,6 +153,21 @@ def train_cnn_model(model, configFile, weightFileName, training_generator, valid
 
     return history
 
+def evaluate_cnn_model(model, weightFileName, generator, testPredFileName, modFileName, evalFileName, gpus):
+    if gpus >= 2:
+        model = multi_gpu_model(model, gpus=gpus)
+
+    model.compile(loss='binary_crossentropy',
+                  optimizer='adam',
+                  metrics=['accuracy'])
+
+    model.load_weights(weightFileName)
+
+    evals = model.evaluate_generator(generator, verbose=1, steps=None)
+    print(evals)
+
+    np.savetxt(evalFileName, evals, fmt='%f')
+
 print('Python version ' + sys.version)
 print('argparse version ' + argparse.__version__)
 print('numpy version ' + np.__version__)
@@ -201,7 +228,7 @@ def main():
     evalFileName = os.path.join(str(args.odir), '{0}.evals'.format(str(args.tag)))
     profileFileName = os.path.join(str(args.odir), '{0}.profile'.format(str(args.tag)))
 
-    ifiles = [h5py.File(args.data, 'r')]
+    ifiles = [h5py.File(u, 'r') for u in args.data.split(',')]
 
     ##### Load the model from the specified JSON file
     model = model_from_json(open(args.model, 'r').read())
@@ -245,7 +272,7 @@ def main():
     print([u.shape for u in training_generator[0]])
 
     history = train_cnn_model(model, args.train_config, weightFileName, training_generator, validation_generator, gpus, tf_logdir)
-
+    evaluate_cnn_model(model, weightFileName, test_generator, testPredFileName, modFileName, evalFileName, gpus)
 
 if __name__ == '__main__':
     main()
