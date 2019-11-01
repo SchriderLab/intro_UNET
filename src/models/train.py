@@ -227,6 +227,7 @@ def main():
     modFileName = os.path.join(str(args.odir), '{0}.mdl'.format(str(args.tag)))
     evalFileName = os.path.join(str(args.odir), '{0}.evals'.format(str(args.tag)))
     profileFileName = os.path.join(str(args.odir), '{0}.profile'.format(str(args.tag)))
+    historyName = os.path.join(str(args.odir), '{0}.history.pkl'.format(str(args.tag)))
 
     ifiles = [h5py.File(u, 'r') for u in args.data.split(',')]
 
@@ -273,6 +274,8 @@ def main():
 
     history = train_cnn_model(model, args.train_config, weightFileName, training_generator, validation_generator, gpus, tf_logdir)
     evaluate_cnn_model(model, weightFileName, test_generator, testPredFileName, modFileName, evalFileName, gpus)
+
+    pickle.dump(history, open(historyName, 'wb'))
 
 if __name__ == '__main__':
     main()
