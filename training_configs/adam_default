@@ -1,0 +1,17 @@
+[optimizer]
+name = adam
+
+[optimizer_params]
+lr = 0.001
+batch_size = 256
+
+n_epochs = 25
+n_steps_per_epoch = 400
+
+LROnPlateau_patience = 3
+LROnPlateau_factor = 0.5
+EarlyStoppingPatience = 30
+
+order_by_snps = False
+sort_individuals = False
+shuffle_individuals = False
