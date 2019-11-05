@@ -18,8 +18,6 @@ test.lot contains some other information about each rep (including the values of
 """
 
 scriptName, numReps, physLen, donorPop, introgLogFileName = sys.argv[1:]
-if not donorPop in ["0", "1", "2"]:
-    sys.exit("'donorPop' arg must be 0 (no introgression) 1 (1->2 going forward) or 2 (2-> going forward)")
 numReps = int(numReps)
 physLen = int(physLen)
 donorPop = int(donorPop)
