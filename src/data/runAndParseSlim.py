@@ -202,7 +202,7 @@ for repIndex in range(numReps):
     #print(repIndex)
     sys.stderr.write("starting rep {}\n".format(repIndex))
     seed = random.randint(0, 2**32-1)
-    if scriptName in ["introg.slim"]:
+    if scriptName in ["introg.slim", "introg_bidirectional.slim"]:
         slimCmd = "slim -seed {} -d physLen={} -d sampleSizePerSubpop=24 -d donorPop={} {}".format(seed, physLen, donorPop, scriptName)
     else:
         sys.exit("Unsupported slim script! ARRRGGHHHH!!!!!")
