@@ -11,6 +11,18 @@ from scipy.optimize import linear_sum_assignment
 def add_channel(matrix):
     return matrix.reshape(matrix.shape + (1, ))
 
+def plot_sorting(x, y, xo, yo):
+    fig, axes = plt.subplots(nrows = 2, ncols = 2)
+
+    axes[0][0].imshow(x, cmap = 'gray')
+    axes[0][1].imshow(y, cmap = 'gray')
+
+    axes[1][0].imshow(xo, cmap = 'gray')
+    axes[1][1].imshow(yo, cmap = 'gray')
+
+    plt.show()
+    plt.close()
+
 def min_diff_indices(amat, method = 'min'):
     mb = NearestNeighbors(len(amat), metric = 'manhattan').fit(amat)
     v = mb.kneighbors(amat)
