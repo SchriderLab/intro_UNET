@@ -14,7 +14,7 @@ def parse_args():
     # my args
     parser.add_argument("--verbose", action = "store_true", help = "display messages")
     parser.add_argument("--idir", default = "/proj/dschridelab/introgression_data/sims_raw_v1")
-    parser.add_argument("--ofile", default = "/proj/dscridelab/introgression_data/data_v1.0.hdf5")
+    parser.add_argument("--ofile", default = "data_v1.0.hdf5")
 
     parser.add_argument("--format_mode", default = "None")
 
@@ -74,6 +74,7 @@ def main():
 
                 X.append(x_)
                 y.append(itarget_)
+
         elif args.format_mode == 'max_match_sorted':
             for k in range(len(x)):
                 x_, indices = sort_cdist(x[k], opt = 'max', sort_pop = True)
@@ -81,6 +82,7 @@ def main():
 
                 X.append(x_)
                 y.append(itarget_)
+
         elif args.format_mode == 'min_match':
             for k in range(len(x)):
                 x_, indices = sort_cdist(x[k], opt='min', sort_pop=False)
