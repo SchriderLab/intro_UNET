@@ -9,7 +9,7 @@ def parse_args():
     parser.add_argument("--verbose", action = "store_true", help = "display messages")
     parser.add_argument("--odir", default = "/proj/dschridelab/introgression_data/")
     parser.add_argument("--n_jobs", default = "1000")
-    parser.add_argument("--n_replicates", default = "200000")
+    parser.add_argument("--n_replicates", default = "100000")
 
     parser.add_argument("--donor_pop", default = "1")
 
@@ -39,7 +39,7 @@ def main():
 
     # should have an even number of pop1 to pop2 vs. pop2 to pop1
     # eventually we'll put in introgression both ways
-    cmd = 'sbatch -t 2-00:00:00 --wrap "python3 src/data/runAndParseSlim.py introg_bidirectional.slim {0} 3000 {1} {2} 1> {3}"'
+    cmd = 'sbatch -t 2-00:00:00 --wrap "python3 src/data/runAndParseSlim.py src/data/introg_bidirectional.slim {0} 3000 {1} {2} 1> {3}"'
 
     counter = 0
 
