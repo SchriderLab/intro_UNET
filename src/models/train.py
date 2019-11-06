@@ -36,7 +36,7 @@ from keras.engine.input_layer import InputLayer
 import h5py
 
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 
@@ -195,6 +195,8 @@ def parse_args():
     parser.add_argument("--odir", default = "training_output")
     parser.add_argument("--tf_logdir", default = "training_output")
 
+    parser.add_argument("--indices", default = "None")
+
     args = parser.parse_args()
 
     if args.verbose:
@@ -234,17 +236,20 @@ def main():
     ##### Load the model from the specified JSON file
     model = model_from_json(open(args.model, 'r').read())
 
-    indices = dict()
-    keys = ['train', 'test', 'val']
+    if args.indices == "None":
+        indices = dict()
+        keys = ['train', 'test', 'val']
 
-    for key in keys:
-        indices[key] = []
+        for key in keys:
+            indices[key] = []
 
-    for ifile in ifiles:
-        _ = get_partition_indices(list(ifile.keys()), testProp, valProp)
+        for ifile in ifiles:
+            _ = get_partition_indices(list(ifile.keys()), testProp, valProp)
 
-        for key in _.keys():
-            indices[key].append(_[key])
+            for key in _.keys():
+                indices[key].append(_[key])
+    else:
+        indices = pickle.load(open(args.indices, 'rb'))
 
     n_inputs = 0
 
