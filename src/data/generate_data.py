@@ -44,7 +44,8 @@ def main():
     counter = 0
 
     for ix in range(n_jobs):
-        os.system(cmd.format(replicates_per, args.donor_pop, os.path.join(args.odir, 'sim.{0:06d}.log'.format(counter)), os.path.join(args.odir, 'sim.{0:06d}.ms'.format(counter))))
+        print(cmd.format(replicates_per, args.donor_pop, os.path.join(args.odir, 'sim.{0:06d}.log'.format(counter)), os.path.join(args.odir, 'sim.{0:06d}.ms'.format(counter))))
+        #os.system(cmd.format(replicates_per, args.donor_pop, os.path.join(args.odir, 'sim.{0:06d}.log'.format(counter)), os.path.join(args.odir, 'sim.{0:06d}.ms'.format(counter))))
         counter += 1
 
 if __name__ == '__main__':
