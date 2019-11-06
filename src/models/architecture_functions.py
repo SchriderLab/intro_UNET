@@ -303,17 +303,5 @@ if __name__ == '__main__':
     f.write(jss)
     f.close()
 
-    model = SegNet()
-
-    print(model.summary())
-
-    jss = model.to_json()
-
-    obj = json.loads(jss)
-    jss = json.dumps(obj, indent=4, sort_keys=True)
-
-    f = open('default_SegNet.json', 'w')
-    f.write(jss)
-    f.close()
 
 
