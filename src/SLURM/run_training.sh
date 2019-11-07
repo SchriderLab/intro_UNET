@@ -15,6 +15,8 @@ TAG=$4
 BATCH_SIZE=$5
 INDICES=$6
 
+mkdir -p ${ODIR}
+
 date
 hostname
 
