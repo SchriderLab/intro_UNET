@@ -8,6 +8,29 @@ import json,pprint
 
 from scipy.optimize import linear_sum_assignment
 
+def get_params(out):
+    ret = []
+
+    # migTime, migProb12, migProb21
+    _ = []
+
+    ifile = open(out, 'r')
+    line = ifile.readline()
+
+    while line != '':
+        if 'migTime' in line:
+            _.append(int(line.replace('migTime: ', '').replace('\n', '')))
+        elif 'migProbs' in line:
+            _.extend(list(map(float, line.replace('migProbs:', '').replace('\n', '').split(','))))
+
+            ret.append(_)
+            _ = []
+
+        line = ifile.readline()
+
+    return np.array(ret)
+
+
 def add_channel(matrix):
     return matrix.reshape(matrix.shape + (1, ))
 

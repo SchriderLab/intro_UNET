@@ -35,9 +35,7 @@ def main():
 
     ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])
     log_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'log.gz' in u])
-
-    ms_files = ms_files[: len(ms_files) // 2]
-    log_files = log_files[: len(log_files) // 2]
+    out_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if '.out' in u])
 
     batch_size = int(args.batch_size)
 
@@ -45,6 +43,7 @@ def main():
 
     X = []
     y = []
+    params = []
 
     introg = {}
 
@@ -54,8 +53,12 @@ def main():
     for ix in range(len(ms_files)):
         ms = ms_files[ix]
         log = log_files[ix]
+        out = out_files[ix]
 
         x, ipos, itarget, iintrog_reg = load_data(ms, log, 128, 48)
+        p = get_params(out)
+
+        params.extend(p)
 
         if args.format_mode == 'None':
             X.extend(x)
@@ -108,9 +111,11 @@ def main():
             
             ofile.create_dataset('{0}/x_0'.format(counter), data = add_channel(np.array(X[-batch_size:], dtype = np.uint8)), compression = 'lzf')
             ofile.create_dataset('{0}/y'.format(counter), data = add_channel(np.array(y[-batch_size:], dtype = np.uint8)), compression = 'lzf')
+            ofile.create_dataset('{0}/params'.format(counter), data = np.array(params[-batch_size:]), dtype = np.float32, compression = 'lzf')
 
             del X[-batch_size:]
             del y[-batch_size:]
+            del params[-batch_size:]
 
             counter += 1
 
