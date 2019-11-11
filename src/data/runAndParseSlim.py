@@ -204,7 +204,7 @@ for repIndex in range(numReps):
     seed = random.randint(0, 2**32-1)
 
     slimCmd = "slim -seed {} -d physLen={} -d sampleSizePerSubpop=24 -d donorPop={} {}".format(seed, physLen, donorPop, scriptName)
-    
+
 
     procOut = subprocess.Popen(slimCmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, err  = procOut.communicate()

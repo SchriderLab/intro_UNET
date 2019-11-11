@@ -123,7 +123,11 @@ def train_cnn_model(model, configFile, weightFileName, training_generator, valid
 
 
     n_epochs = int(config.get('optimizer_params', 'n_epochs'))
-    n_steps_per_epoch = int(config.get('optimizer_params', 'n_steps_per_epoch'))
+
+    if config.get('optimizer_params', 'n_steps_per_epoch') != 'None':
+        n_steps_per_epoch = int(config.get('optimizer_params', 'n_steps_per_epoch'))
+    else:
+        n_steps_per_epoch = None
 
     batch_size = int(config.get('optimizer_params', 'batch_size'))
     LROnPlateau_patience = int(config.get('optimizer_params', 'LROnPlateau_patience'))
