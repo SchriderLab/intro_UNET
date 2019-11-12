@@ -91,7 +91,7 @@ class TrainValTensorBoard(TensorBoard):
         super(TrainValTensorBoard, self).on_train_end(logs)
         self.val_writer.close()
 
-def train_cnn_model(model, configFile, weightFileName, training_generator, validation_generator, gpus, tf_logdir):
+def train_cnn_model(model, configFile, weightFileName, training_generator, validation_generator, gpus, tf_logdir, args):
     """
     Compile the model with the adam optimizer and the mean_squared_error loss function.
     Train the model for a given number of epochs in a given batch size until a specified stopping criterion is reached.
@@ -134,9 +134,14 @@ def train_cnn_model(model, configFile, weightFileName, training_generator, valid
     LROnPlateau_factor = float(config.get('optimizer_params', 'LROnPlateau_factor'))
     EarlyStoppingPatience = int(config.get('optimizer_params', 'EarlyStoppingPatience'))
 
-    model.compile(loss='binary_crossentropy',
-                  optimizer='adam',
-                  metrics=['accuracy'])
+    if args.loss == 'binary_crossentropy':
+        model.compile(loss='binary_crossentropy',
+                      optimizer='adam',
+                      metrics=['accuracy'])
+    elif args.loss == 'dice_coef':
+        model.compile(loss=dice_coef_loss,
+                      optimizer='adam',
+                      metrics=['accuracy'])
 
     # Tensor-board callback
     tbCallBack = TrainValTensorBoard(log_dir = tf_logdir, histogram_freq = 0, write_graph = True, write_images = True, write_grads = False, update_freq = 'epoch')
@@ -163,7 +168,7 @@ def evaluate_cnn_model(model, weightFileName, generator, testPredFileName, modFi
 
     model.compile(loss='binary_crossentropy',
                   optimizer='adam',
-                  metrics=['accuracy'])
+                  metrics=['accuracy', dice_coef])
 
     model.load_weights(weightFileName)
 
@@ -200,6 +205,7 @@ def parse_args():
     parser.add_argument("--tf_logdir", default = "training_output")
 
     parser.add_argument("--indices", default = "None")
+    parser.add_argument("--loss", default = "binary_crossentropy")
 
     args = parser.parse_args()
 
@@ -281,7 +287,7 @@ def main():
 
     print([u.shape for u in training_generator[0]])
 
-    history = train_cnn_model(model, args.train_config, weightFileName, training_generator, validation_generator, gpus, tf_logdir)
+    history = train_cnn_model(model, args.train_config, weightFileName, training_generator, validation_generator, gpus, tf_logdir, args)
     evaluate_cnn_model(model, weightFileName, test_generator, testPredFileName, modFileName, evalFileName, gpus)
 
     pickle.dump(history, open(historyName, 'wb'))
@@ -289,6 +295,6 @@ def main():
 if __name__ == '__main__':
     main()
 
-    
+#data/data_AB_NN.hdf5,data/data_BA_NN.hdf5,data/data_bi_NN.hdf5
 
     
