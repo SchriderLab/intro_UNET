@@ -91,7 +91,7 @@ class TrainValTensorBoard(TensorBoard):
         super(TrainValTensorBoard, self).on_train_end(logs)
         self.val_writer.close()
 
-def train_cnn_model(model, configFile, weightFileName, training_generator, validation_generator, gpus, tf_logdir, args):
+def train_cnn_model(model, configFile, weightFileName, training_generator, validation_generator, gpus, tf_logdir):
     """
     Compile the model with the adam optimizer and the mean_squared_error loss function.
     Train the model for a given number of epochs in a given batch size until a specified stopping criterion is reached.
@@ -134,11 +134,11 @@ def train_cnn_model(model, configFile, weightFileName, training_generator, valid
     LROnPlateau_factor = float(config.get('optimizer_params', 'LROnPlateau_factor'))
     EarlyStoppingPatience = int(config.get('optimizer_params', 'EarlyStoppingPatience'))
 
-    if args.loss == 'binary_crossentropy':
+    if config.get('optimizer_params', 'loss') == 'binary_crossentropy':
         model.compile(loss='binary_crossentropy',
                       optimizer='adam',
                       metrics=['accuracy'])
-    elif args.loss == 'dice_coef':
+    elif config.get('optimizer_params', 'loss') == 'dice_coef':
         model.compile(loss=dice_coef_loss,
                       optimizer='adam',
                       metrics=['accuracy'])
@@ -205,7 +205,6 @@ def parse_args():
     parser.add_argument("--tf_logdir", default = "training_output")
 
     parser.add_argument("--indices", default = "None")
-    parser.add_argument("--loss", default = "binary_crossentropy")
 
     args = parser.parse_args()
 
@@ -287,7 +286,7 @@ def main():
 
     print([u.shape for u in training_generator[0]])
 
-    history = train_cnn_model(model, args.train_config, weightFileName, training_generator, validation_generator, gpus, tf_logdir, args)
+    history = train_cnn_model(model, args.train_config, weightFileName, training_generator, validation_generator, gpus, tf_logdir)
     evaluate_cnn_model(model, weightFileName, test_generator, testPredFileName, modFileName, evalFileName, gpus)
 
     pickle.dump(history, open(historyName, 'wb'))
