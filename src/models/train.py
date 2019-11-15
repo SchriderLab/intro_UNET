@@ -4,7 +4,6 @@ import configparser
 import pickle
 import numpy as np
 import psutil
-import tensorflow as tf
 
 import tensorflow as tf
 
@@ -17,12 +16,20 @@ set_session(session)
 
 import sklearn
 import keras
+
+from keras.activations import relu
+
+def relu6(x):
+    return relu(x, max_value=6)
+
 from keras.models import Model, model_from_json
+#from tensorflow.keras.models import model_from_json
+
 from keras.layers import Input, Dense, Dropout, Flatten
 from keras.layers.merge import concatenate
 from keras.layers.convolutional import Conv2D, Conv1D
 from keras.layers.pooling import MaxPooling2D, AveragePooling1D
-from architecture_functions import *
+#from architecture_functions import *
 
 from data_on_the_fly_classes import DataGenerator
 from cnn_data_functions import create_data_batch, rm_broken_sims, get_max_snps, get_ids, partition_data, get_partition_indices
@@ -34,6 +41,8 @@ from keras.callbacks import TensorBoard
 
 from keras.engine.input_layer import InputLayer
 import h5py
+
+from tensorflow.compat.v1.image import resize
 
 import matplotlib
 #matplotlib.use('Agg')
@@ -205,6 +214,7 @@ def parse_args():
     parser.add_argument("--tf_logdir", default = "training_output")
 
     parser.add_argument("--indices", default = "None")
+    parser.add_argument("--weights", default = "None")
 
     args = parser.parse_args()
 
@@ -243,7 +253,12 @@ def main():
     ifiles = [h5py.File(u, 'r') for u in args.data.split(',')]
 
     ##### Load the model from the specified JSON file
-    model = model_from_json(open(args.model, 'r').read())
+
+    if args.weights == 'None':
+        model = model_from_json(open(args.model, 'r').read())
+    else:
+        model = model_from_json(open(args.model, 'r').read())
+        model.load_weights(args.weights)
 
     if args.indices == "None":
         indices = dict()
@@ -283,8 +298,6 @@ def main():
     training_generator = DataGenerator(indices['train'], **params)
     validation_generator = DataGenerator(indices['val'], **params)
     test_generator = DataGenerator(indices['test'], **params)
-
-    print([u.shape for u in training_generator[0]])
 
     history = train_cnn_model(model, args.train_config, weightFileName, training_generator, validation_generator, gpus, tf_logdir)
     evaluate_cnn_model(model, weightFileName, test_generator, testPredFileName, modFileName, evalFileName, gpus)
