@@ -20,6 +20,8 @@ def parse_args():
 
     parser.add_argument("--batch_size", default = "8")
 
+    parser.add_argument("--n_individuals", default = "48")
+
     args = parser.parse_args()
 
     if args.verbose:
@@ -55,7 +57,7 @@ def main():
         log = log_files[ix]
         out = out_files[ix]
 
-        x, ipos, itarget, iintrog_reg = load_data(ms, log, 128, 48)
+        x, ipos, itarget, iintrog_reg = load_data(ms, log, 128, int(args.n_individuals))
         p = get_params(out)
 
         params.extend(p)
