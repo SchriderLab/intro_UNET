@@ -11,6 +11,8 @@ def parse_args():
     parser.add_argument("--n_jobs", default = "1000")
     parser.add_argument("--n_replicates", default = "100000")
 
+    parser.add_argument("--n_per_pop", default = "24")
+
     parser.add_argument("--donor_pop", default = "1")
 
     args = parser.parse_args()
@@ -39,13 +41,13 @@ def main():
 
     # should have an even number of pop1 to pop2 vs. pop2 to pop1
     # eventually we'll put in introgression both ways
-    cmd = 'sbatch -o {4} -t 2-00:00:00 --wrap "python3 src/data/runAndParseSlim.py src/data/introg_bidirectional.slim {0} 3000 {1} {2} 1> {3}"'
+    cmd = 'sbatch -o {4} -t 2-00:00:00 --wrap "python3 src/data/runAndParseSlim.py src/data/introg_bidirectional.slim {0} 3000 {1} {2} 1> {3} {5}"'
 
     counter = 0
 
     for ix in range(n_jobs):
         print(cmd.format(replicates_per, args.donor_pop, os.path.join(args.odir, 'sim.{0:06d}.log'.format(counter)), os.path.join(args.odir, 'sim.{0:06d}.ms'.format(counter)), os.path.join(args.odir, 'sim.{0:06d}.out'.format(counter))))
-        os.system(cmd.format(replicates_per, args.donor_pop, os.path.join(args.odir, 'sim.{0:06d}.log'.format(counter)), os.path.join(args.odir, 'sim.{0:06d}.ms'.format(counter)), os.path.join(args.odir, 'sim.{0:06d}.out'.format(counter))))
+        os.system(cmd.format(replicates_per, args.donor_pop, os.path.join(args.odir, 'sim.{0:06d}.log'.format(counter)), os.path.join(args.odir, 'sim.{0:06d}.ms'.format(counter)), os.path.join(args.odir, 'sim.{0:06d}.out'.format(counter)), args.n_per_pop))
         counter += 1
 
 if __name__ == '__main__':

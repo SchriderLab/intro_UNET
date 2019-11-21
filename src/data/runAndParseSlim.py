@@ -17,7 +17,7 @@ the script.
 test.lot contains some other information about each rep (including the values of some of the randomly drawn parameters)
 """
 
-scriptName, numReps, physLen, donorPop, introgLogFileName = sys.argv[1:]
+scriptName, numReps, physLen, donorPop, introgLogFileName, nPerPop = sys.argv[1:]
 numReps = int(numReps)
 physLen = int(physLen)
 donorPop = int(donorPop)
@@ -203,7 +203,7 @@ for repIndex in range(numReps):
     sys.stderr.write("starting rep {}\n".format(repIndex))
     seed = random.randint(0, 2**32-1)
 
-    slimCmd = "slim -seed {} -d physLen={} -d sampleSizePerSubpop=24 -d donorPop={} {}".format(seed, physLen, donorPop, scriptName)
+    slimCmd = "slim -seed {} -d physLen={} -d sampleSizePerSubpop={} -d donorPop={} {}".format(seed, physLen nPerPop, donorPop, scriptName)
 
 
     procOut = subprocess.Popen(slimCmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -211,7 +211,7 @@ for repIndex in range(numReps):
     sys.stderr.write("seed: {}\n".format(seed))
     #print(output.decode("utf-8"))
 
-    mutations, genomes, introgressedAlleles = readSampleOutFromSlimRun(output, 1, 24)
+    mutations, genomes, introgressedAlleles = readSampleOutFromSlimRun(output, 1, int(nPerPop))
     newMutLocs = []
     for mutPos in mutations:
         if len(mutations[mutPos]) == 1:
