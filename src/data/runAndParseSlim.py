@@ -203,7 +203,7 @@ for repIndex in range(numReps):
     sys.stderr.write("starting rep {}\n".format(repIndex))
     seed = random.randint(0, 2**32-1)
 
-    slimCmd = "slim -seed {} -d physLen={} -d sampleSizePerSubpop={} -d donorPop={} {}".format(seed, physLen nPerPop, donorPop, scriptName)
+    slimCmd = "slim -seed {} -d physLen={} -d sampleSizePerSubpop={} -d donorPop={} {}".format(seed, physLen, nPerPop, donorPop, scriptName)
 
 
     procOut = subprocess.Popen(slimCmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
