@@ -23,13 +23,6 @@ def relu6(x):
     return relu(x, max_value=6)
 
 from keras.models import Model, model_from_json
-#from tensorflow.keras.models import model_from_json
-
-from keras.layers import Input, Dense, Dropout, Flatten
-from keras.layers.merge import concatenate
-from keras.layers.convolutional import Conv2D, Conv1D
-from keras.layers.pooling import MaxPooling2D, AveragePooling1D
-#from architecture_functions import *
 
 from data_on_the_fly_classes import DataGenerator
 from cnn_data_functions import create_data_batch, rm_broken_sims, get_max_snps, get_ids, partition_data, get_partition_indices
@@ -41,13 +34,6 @@ from keras.callbacks import TensorBoard
 
 from keras.engine.input_layer import InputLayer
 import h5py
-
-from tensorflow.compat.v1.image import resize
-
-import matplotlib
-#matplotlib.use('Agg')
-
-import matplotlib.pyplot as plt
 
 def relu_clipped(x):
     return K.relu(x, max_value=1)
