@@ -15,6 +15,7 @@ import os
 from keras import backend as K
 
 import numpy as np
+from deeplab_model import *
 
 def relu_clipped(x):
     return K.relu(x, max_value=1)
@@ -167,130 +168,60 @@ def UNET_deepintraSV(input_shape = (48, 128, 1), batch_normalization = True, k0 
 
     return model
 
-def SegNet(input_shape = (48, 128, 1)):
-    n_labels = 2
 
-    kernel = 3
+def SegNet(input_shape=(360, 480, 3), classes=12):
+    # c.f. https://github.com/alexgkendall/SegNet-Tutorial/blob/master/Example_Models/bayesian_segnet_camvid.prototxt
+    img_input = Input(shape=input_shape)
+    x = img_input
+    # Encoder
+    x = Conv2D(64, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+    x = MaxPooling2D(pool_size=(2, 2))(x)
 
-    encoding_layers = [
-        Conv2D(64, kernel, border_mode='same', input_shape=input_shape),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(64, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        MaxPooling2D(),
+    x = Conv2D(128, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+    x = MaxPooling2D(pool_size=(2, 2))(x)
 
-        Conv2D(128, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(128, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        MaxPooling2D(),
+    x = Conv2D(256, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+    x = MaxPooling2D(pool_size=(2, 2))(x)
 
-        Conv2D(256, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(256, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(256, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        MaxPooling2D(),
+    x = Conv2D(512, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
 
-        Conv2D(512, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(512, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(512, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        MaxPooling2D(),
+    # Decoder
+    x = Conv2D(512, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
 
-        Conv2D(512, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(512, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(512, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        MaxPooling2D(),
-    ]
+    x = UpSampling2D(size=(2, 2))(x)
+    x = Conv2D(256, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
 
-    autoencoder = models.Sequential()
-    autoencoder.encoding_layers = encoding_layers
+    x = UpSampling2D(size=(2, 2))(x)
+    x = Conv2D(128, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
 
-    for l in autoencoder.encoding_layers:
-        autoencoder.add(l)
-        print(l.input_shape, l.output_shape, l)
+    x = UpSampling2D(size=(2, 2))(x)
+    x = Conv2D(64, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
 
-    decoding_layers = [
-        UpSampling2D(),
-        Conv2D(512, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(512, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(512, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-
-        UpSampling2D(),
-        Conv2D(512, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(512, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(256, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-
-        UpSampling2D(),
-        Conv2D(256, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(256, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(128, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-
-        UpSampling2D(),
-        Conv2D(128, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(64, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-
-        UpSampling2D(),
-        Conv2D(64, kernel, kernel, border_mode='same'),
-        BatchNormalization(),
-        Activation('relu'),
-        Conv2D(n_labels, 1, 1, border_mode='valid'),
-        BatchNormalization(),
-    ]
-    autoencoder.decoding_layers = decoding_layers
-    for l in autoencoder.decoding_layers:
-        autoencoder.add(l)
-
-    #autoencoder.add(Reshape((n_labels, input_shape[0] * input_shape[1])))
-    #autoencoder.add(Permute((2, 1)))
-    autoencoder.add(Activation('softmax'))
-
-    return autoencoder
+    x = Conv2D(classes, 1, 1, border_mode="valid")(x)
+    #x = Reshape((input_shape[0] * input_shape[1], classes))(x)
+    x = Activation("sigmoid")(x)
+    model = Model(img_input, x)
+    return model
     
 if __name__ == '__main__':
-    model = UNET_deepintraSV()
+
+    model = UNET_deepintraSV(input_shape = (128, 128, 1), batch_normalization = True, k0 = 64, alpha = 2)
 
     print(model.summary())
 
@@ -299,9 +230,20 @@ if __name__ == '__main__':
     obj = json.loads(jss)
     jss = json.dumps(obj, indent = 4, sort_keys = True)
 
-    f = open('deepintraSV_v0.1.json', 'w')
+    f = open('deepintraSV_k0_64_128.json', 'w')
     f.write(jss)
     f.close()
 
+    model = SegNet((128, 128, 1), 1)
 
+    print(model.summary())
+
+    jss = model.to_json()
+
+    obj = json.loads(jss)
+    jss = json.dumps(obj, indent = 4, sort_keys = True)
+
+    f = open('SegNet_v0.1.json', 'w')
+    f.write(jss)
+    f.close()
 
