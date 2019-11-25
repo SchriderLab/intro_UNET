@@ -12,7 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     # my args
     parser.add_argument("--verbose", action="store_true", help="display messages")
-    parser.add_argument("--data", default = "None")
+    parser.add_argument("--data", default = "data/data_AB_NN.hdf5,data/data_BA_NN.hdf5,data/data_bi_NN.hdf5")
 
     parser.add_argument("--val_prop", default = "0.1")
     parser.add_argument("--test_prop", default = "0.1")
