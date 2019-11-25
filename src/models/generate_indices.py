@@ -5,7 +5,26 @@ import pickle
 
 import h5py
 
-from cnn_data_functions import get_partition_indices
+
+def get_partition_indices(batches, testProp, valProp):
+    ret = dict()
+
+    n_batches = len(batches)
+
+    n_train = int(np.floor((1 - (testProp + valProp)) * n_batches))
+    n_val = int(np.floor(valProp * n_batches))
+    n_test = int(np.floor(testProp * n_batches))
+
+    ret['train'] = np.random.choice(batches, n_train, replace=False)
+    batches = list(set(batches).difference(ret['train']))
+
+    ret['val'] = np.random.choice(batches, n_val, replace=False)
+    batches = list(set(batches).difference(ret['val']))
+
+    ret['test'] = np.random.choice(batches, n_test, replace=False)
+    batches = list(set(batches).difference(ret['test']))
+
+    return ret
 
 def parse_args():
     # Argument Parser
