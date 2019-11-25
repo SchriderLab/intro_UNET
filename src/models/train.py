@@ -25,7 +25,7 @@ def relu6(x):
 from keras.models import Model, model_from_json
 
 from data_on_the_fly_classes import DataGenerator
-from cnn_data_functions import create_data_batch, rm_broken_sims, get_max_snps, get_ids, partition_data, get_partition_indices
+from cnn_data_functions import *
 
 from keras.utils import multi_gpu_model
 from keras import backend as K
@@ -37,18 +37,6 @@ import h5py
 
 def relu_clipped(x):
     return K.relu(x, max_value=1)
-
-def dice_coef(y_true, y_pred, smooth=1):
-    """
-    Dice = (2*|X & Y|)/ (|X|+ |Y|)
-         =  2*sum(|A*B|)/(sum(A^2)+sum(B^2))
-    ref: https://arxiv.org/pdf/1606.04797v1.pdf
-    """
-    intersection = K.sum(K.abs(y_true * y_pred), axis=-1)
-    return (2. * intersection + smooth) / (K.sum(K.square(y_true),-1) + K.sum(K.square(y_pred),-1) + smooth)
-
-def dice_coef_loss(y_true, y_pred):
-    return 1 - dice_coef(y_true, y_pred)
 
 class TrainValTensorBoard(TensorBoard):
     def __init__(self, log_dir='./logs', **kwargs):
@@ -132,11 +120,15 @@ def train_cnn_model(model, configFile, weightFileName, training_generator, valid
     if config.get('optimizer_params', 'loss') == 'binary_crossentropy':
         model.compile(loss='binary_crossentropy',
                       optimizer='adam',
-                      metrics=['accuracy'])
+                      metrics=['accuracy', dice_coef_loss, 'binary_crossentropy'])
     elif config.get('optimizer_params', 'loss') == 'dice_coef':
         model.compile(loss=dice_coef_loss,
                       optimizer='adam',
-                      metrics=['accuracy'])
+                      metrics=['accuracy', dice_coef_loss, 'binary_crossentropy'])
+    elif config.get('optimizer_params', 'loss') == 'mixed':
+        model.compile(loss=mixed_loss,
+                      optimizer='adam',
+                      metrics=['accuracy', dice_coef_loss, 'binary_crossentropy'])
 
     # Tensor-board callback
     tbCallBack = TrainValTensorBoard(log_dir = tf_logdir, histogram_freq = 0, write_graph = True, write_images = True, write_grads = False, update_freq = 'epoch')
