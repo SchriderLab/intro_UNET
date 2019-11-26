@@ -2,7 +2,7 @@ import os
 import logging, argparse
 import itertools
 
-batch_sizes = [16, 32, 64, 128, 256]
+batch_sizes = [128, 256]
 losses = ['binary_crossentropy', 'mixed', 'dice_coef']
 
 config_dir = 'training_configs'
@@ -42,9 +42,11 @@ def main():
     todo = list(itertools.product(batch_sizes, losses))
 
     for bs, loss in todo:
+        n_gpus = 3
+
         tag = args.tag + '_{0}_{1}'.format(bs, loss)
 
-        cmd_ = cmd.format(args.model, args.data, args.odir, tag, bs, args.indices, os.path.join(config_dir, loss), args.n_gpus)
+        cmd_ = cmd.format(args.model, args.data, args.odir, tag, bs, args.indices, os.path.join(config_dir, loss), n_gpus)
         print(cmd_)
 
         os.system(cmd_)
