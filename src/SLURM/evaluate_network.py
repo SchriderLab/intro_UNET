@@ -30,20 +30,27 @@ def parse_args():
     else:
         logging.basicConfig(level=logging.INFO)
 
+    return args
+
 def main():
     args = parse_args()
 
     # model, data, output directory, tag, batch size, indices
     if args.cluster == 'longleaf':
-        cmd = 'sbatch --partition=volta-gpu  --gres=gpu:1 --time=04:00:00 --qos=gpu_access src/SLURM/run_training.sh {0} {1} {2} {3} {4} {5}'
+        cmd = 'sbatch --partition=volta-gpu  --gres=gpu:{7} --time=2-00:00:00 --qos=gpu_access src/SLURM/run_training.sh {0} {1} {2} {3} {4} {5} {6} {7}'
 
     todo = list(itertools.product(batch_sizes, losses))
 
     for bs, loss in todo:
         tag = args.tag + '_{0}_{1}'.format(bs, loss)
 
-        os.system(cmd.format(args.model, args.data, args.odir, tag, bs, args.indices, os.path.join(config_dir, loss), args.n_gpus))
+        cmd_ = cmd.format(args.model, args.data, args.odir, tag, bs, args.indices, os.path.join(config_dir, loss), args.n_gpus)
+        print(cmd_)
+
+        os.system(cmd_)
 
 if __name__ == '__main__':
     main()
+
+
 
