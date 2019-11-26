@@ -9,6 +9,7 @@ import networkx as nx
 import itertools
 
 from keras import backend as K
+import keras
 
 from scipy.sparse import csr_matrix
 
@@ -23,6 +24,9 @@ def dice_coef(y_true, y_pred, smooth=1):
 
 def dice_coef_loss(y_true, y_pred):
     return 1 - dice_coef(y_true, y_pred)
+
+def mixed_loss(y_true, y_pred):
+    return 0.5 * keras.losses.binary_crossentropy(y_true, y_pred) - dice_coef(y_true, y_pred)
 
 def n_snps(ifile):
     fname = os.path.basename(ifile)
