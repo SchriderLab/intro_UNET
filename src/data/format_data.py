@@ -16,7 +16,7 @@ def parse_args():
     parser.add_argument("--idir", default = "/proj/dschridelab/introgression_data/sims_raw_v1")
     parser.add_argument("--ofile", default = "data_v1.0.hdf5")
 
-    parser.add_argument("--format_mode", default = "None")
+    parser.add_argument("--format_mode", default = "sort_NN")
 
     parser.add_argument("--batch_size", default = "8")
 
