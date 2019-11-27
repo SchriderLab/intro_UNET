@@ -1,8 +1,6 @@
 import os
 import logging, argparse
 import itertools
-import numpy as np
-from keras import backend as K
 
 batch_sizes = [128, 256]
 losses = ['binary_crossentropy', 'mixed', 'dice_coef']
