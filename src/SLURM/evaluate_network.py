@@ -3,7 +3,7 @@ import logging, argparse
 import itertools
 
 batch_sizes = [128]
-losses = ['binary_crossentropy', 'mixed', 'dice_coef']
+losses = ['mixed']
 
 config_dir = 'training_configs'
 

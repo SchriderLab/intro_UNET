@@ -120,15 +120,15 @@ def train_cnn_model(model, configFile, weightFileName, training_generator, valid
     if config.get('optimizer_params', 'loss') == 'binary_crossentropy':
         model.compile(loss='binary_crossentropy',
                       optimizer='adam',
-                      metrics=['accuracy', dice_coef_loss, 'binary_crossentropy'])
+                      metrics=['accuracy', dice_coef_loss, 'binary_crossentropy', mixed_loss])
     elif config.get('optimizer_params', 'loss') == 'dice_coef':
         model.compile(loss=dice_coef_loss,
                       optimizer='adam',
-                      metrics=['accuracy', dice_coef_loss, 'binary_crossentropy'])
+                      metrics=['accuracy', dice_coef_loss, 'binary_crossentropy', mixed_loss])
     elif config.get('optimizer_params', 'loss') == 'mixed':
         model.compile(loss=mixed_loss,
                       optimizer='adam',
-                      metrics=['accuracy', dice_coef_loss, 'binary_crossentropy'])
+                      metrics=['accuracy', dice_coef_loss, 'binary_crossentropy', mixed_loss])
 
     # Tensor-board callback
     tbCallBack = TrainValTensorBoard(log_dir = tf_logdir, histogram_freq = 0, write_graph = True, write_images = True, write_grads = False, update_freq = 'epoch')
@@ -280,7 +280,7 @@ def main():
     history = train_cnn_model(model, args.train_config, weightFileName, training_generator, validation_generator, gpus, tf_logdir)
     evaluate_cnn_model(model, weightFileName, test_generator, testPredFileName, modFileName, evalFileName, gpus)
 
-    pickle.dump(history, open(historyName, 'wb'))
+    pickle.dump(history.history, open(historyName, 'wb'))
 
 if __name__ == '__main__':
     main()

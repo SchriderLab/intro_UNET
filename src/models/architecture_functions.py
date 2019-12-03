@@ -169,35 +169,85 @@ def UNET_deepintraSV(input_shape = (48, 128, 1), batch_normalization = True, k0 
     return model
 
 
-def SegNet(input_shape=(360, 480, 3), classes=12):
+def SegNet(input_shape=(360, 480, 3), classes=1):
     # c.f. https://github.com/alexgkendall/SegNet-Tutorial/blob/master/Example_Models/bayesian_segnet_camvid.prototxt
     img_input = Input(shape=input_shape)
     x = img_input
     # Encoder
+
+    # block 1
+    ##############################
+    x = Conv2D(64, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+    x = MaxPooling2D(pool_size=(2, 2))(x)
     x = Conv2D(64, 3, 3, border_mode="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPooling2D(pool_size=(2, 2))(x)
 
+    # block 2
+    ##############################
+    x = Conv2D(128, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+    x = MaxPooling2D(pool_size=(2, 2))(x)
     x = Conv2D(128, 3, 3, border_mode="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPooling2D(pool_size=(2, 2))(x)
 
+    # block 3
+    ##############################
+    x = Conv2D(256, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+    x = MaxPooling2D(pool_size=(2, 2))(x)
+    x = Conv2D(256, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+    x = MaxPooling2D(pool_size=(2, 2))(x)
     x = Conv2D(256, 3, 3, border_mode="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPooling2D(pool_size=(2, 2))(x)
 
+    # block 4
+    ############################
     x = Conv2D(512, 3, 3, border_mode="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
+    x = Conv2D(512, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+    x = Conv2D(512, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+    # ===========================================================
+
 
     # Decoder
+
+    # block 1
+    #############################################
+    x = Conv2D(512, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+    x = Conv2D(512, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
     x = Conv2D(512, 3, 3, border_mode="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
 
+    x = UpSampling2D(size=(2, 2))(x)
+    x = Conv2D(256, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+    x = UpSampling2D(size=(2, 2))(x)
+    x = Conv2D(256, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
     x = UpSampling2D(size=(2, 2))(x)
     x = Conv2D(256, 3, 3, border_mode="same")(x)
     x = BatchNormalization()(x)
@@ -207,7 +257,15 @@ def SegNet(input_shape=(360, 480, 3), classes=12):
     x = Conv2D(128, 3, 3, border_mode="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
+    x = UpSampling2D(size=(2, 2))(x)
+    x = Conv2D(128, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
 
+    x = UpSampling2D(size=(2, 2))(x)
+    x = Conv2D(64, 3, 3, border_mode="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
     x = UpSampling2D(size=(2, 2))(x)
     x = Conv2D(64, 3, 3, border_mode="same")(x)
     x = BatchNormalization()(x)
@@ -221,7 +279,7 @@ def SegNet(input_shape=(360, 480, 3), classes=12):
     
 if __name__ == '__main__':
 
-    model = UNET_deepintraSV(input_shape = (128, 128, 1), batch_normalization = True, k0 = 64, alpha = 2)
+    model = UNET_deepintraSV(input_shape = (64, 128, 1), batch_normalization = True, k0 = 64, alpha = 2)
 
     print(model.summary())
 
@@ -230,11 +288,11 @@ if __name__ == '__main__':
     obj = json.loads(jss)
     jss = json.dumps(obj, indent = 4, sort_keys = True)
 
-    f = open('deepintraSV_k0_64_128.json', 'w')
+    f = open('deepintraSV_k0_64.json', 'w')
     f.write(jss)
     f.close()
 
-    model = SegNet((128, 128, 1), 1)
+    model = SegNet(input_shape = (64, 128, 1))
 
     print(model.summary())
 
@@ -246,4 +304,6 @@ if __name__ == '__main__':
     f = open('SegNet_v0.1.json', 'w')
     f.write(jss)
     f.close()
+
+
 
