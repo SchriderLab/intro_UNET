@@ -18,6 +18,8 @@ def parse_args():
     parser.add_argument("--odir", default = "None")
     parser.add_argument("--tag", default = "None")
 
+    parser.add_argument("--batch_size", default = "144")
+
     parser.add_argument("--cluster", default = "longleaf")
 
     parser.add_argument("--n_gpus", default = "2")
@@ -41,7 +43,8 @@ def main():
 
     todo = list(itertools.product(batch_sizes, losses))
 
-    for bs, loss in todo:
+    for loss in losses:
+        bs = args.batch_size
 
         tag = args.tag + '_{0}_{1}'.format(bs, loss)
 
