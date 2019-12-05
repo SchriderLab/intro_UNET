@@ -4,8 +4,8 @@ import itertools
 
 import platform
 
-batch_sizes = [128]
-losses = ['mixed']
+batch_sizes = [24, 48, 72, 144, 288]
+losses = ['binary_crossentropy', 'dice_coef', 'mixed']
 
 config_dir = 'training_configs'
 
@@ -47,8 +47,7 @@ def main():
 
     todo = list(itertools.product(batch_sizes, losses))
 
-    for loss in losses:
-        bs = args.batch_size
+    for bs, loss in losses:
 
         tag = args.tag + '_{0}_{1}'.format(bs, loss)
 
