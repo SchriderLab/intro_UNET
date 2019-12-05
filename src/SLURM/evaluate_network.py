@@ -47,7 +47,7 @@ def main():
 
     todo = list(itertools.product(batch_sizes, losses))
 
-    for bs, loss in losses:
+    for bs, loss in todo:
 
         tag = args.tag + '_{0}_{1}'.format(bs, loss)
 
