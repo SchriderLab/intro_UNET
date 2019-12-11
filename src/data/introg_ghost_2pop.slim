@@ -22,7 +22,7 @@ initialize()
 	cat("migTime: " + migTime + "\n");
 	cat("simEndTime: " + simEndTime + "\n");
 	
-	rMigProb = runif(1, 0.01, 0.1);
+	rMigProb = runif(1, 0.1, 1.0);
 	defineConstant("migProb32", rMigProb);
 	cat("migProb: " + migProb32 + "\n");
 }
