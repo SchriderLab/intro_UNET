@@ -20,9 +20,6 @@ import keras
 
 from keras.activations import relu
 
-from densenet.classifiers.one_d import DenseNet121
-
-
 def relu6(x):
     return relu(x, max_value=6)
 
