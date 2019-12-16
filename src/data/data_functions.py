@@ -8,6 +8,63 @@ import json,pprint
 
 from scipy.optimize import linear_sum_assignment
 
+def findMiddle(input_list):
+    middle = float(len(input_list))/2
+    if middle % 2 != 0:
+        return input_list[int(middle - .5)]
+    else:
+        return (input_list[int(middle)], input_list[int(middle-1)])[0]
+
+def write_snp_file(positions, ofile):
+    ofile = open(ofile, 'w')
+
+    line = '1:{0}\t1\t 0.000000\t{0}\tA\tG\n'
+
+    for p in positions:
+        ofile.write(line.format(p))
+
+    ofile.close()
+
+def write_binary_matrix(mat, ofile):
+    ofile = open(ofile, 'w')
+
+    mat = mat.T
+
+    for m in mat:
+        ofile.write(''.join(list(map(str,m))) + '\n')
+
+    ofile.close()
+
+def get_windows(x, ipos, wsize = 500):
+    ipos = list(ipos)
+
+    indices = range(x.shape[1])
+    middle_index = findMiddle(indices)
+
+    indices = range(middle_index - 64, middle_index + 64)
+    sets = []
+
+    for ix in indices:
+        p = set([u for u in ipos if (u >= ipos[ix] - wsize) and (u <= ipos[ix])])
+
+        if p not in sets:
+            sets.append(p)
+
+        p = set([u for u in ipos if (u >= ipos[ix]) and (u <= ipos[ix] + wsize)])
+
+        if p not in sets:
+            sets.append(p)
+
+    sets = [sorted(list(u)) for u in sets]
+    sets = sorted(sets, key = lambda u: u[0])
+
+    ret = []
+
+    for s in sets:
+        ret.append([ipos.index(u) for u in s])
+
+    return ret, indices
+
 def get_params(out):
     ret = []
 
@@ -146,54 +203,75 @@ def load_data(msfile, introgressfile, max_len, nindv):
         q = []
         kdx = 1
         for i in L:
-            #print(list(i))
             i = [int(j) for j in i[0]]
             if len(i) > max_len:
                 i = i[:max_len]
             else:
                 print('aah.  too short at ', gdx)
                 break
-            #print(len(p))
-            #missing = max_len - len(i)
-            #for z in range(missing):
-            #    i.append(0)
-            #    if kdx:
-            #        p.append(-1)
-            #kdx = 0
+
             i = np.array(i, dtype=np.int8)
             q.append(i)
-            #print(len(p))
+
         q = np.array(q)
-        #f1,f2 = sort_min_diff(q[0:int(nindv/2)]), sort_min_diff(q[int(nindv/2):nindv])
-        #q = np.append(f1[0],f2[0], axis=0)
-        #row_ord = {jdx:int(uu) for jdx,uu in enumerate(np.append(f1[1], f2[1]+20))}
-        #breakD = {}
-        #for i in igD[gdx]:
-        #    breakD[i] = igD[gdx][row_ord[i]]
-        #igD[gdx] = breakD
-        #pprint.pprint(breakD)
-        #pprint.pprint(igD[gdx])
-        #print('*******************************')
+
         q = q.astype("int8")
         f.append(np.array(q))
         pos_int = np.array(p, dtype='float')
-        #print(pos_int)
-        #pos.append(pos_int* loc_len**-1)
+
         mask_mat = []
         breakD = igD[gdx]
         for indv in range(len(breakD)):
             mask = binary_digitizer(pos_int, breakD[indv])
-            #print(mask)
             mask_mat.append(mask[:max_len])
-            #if breakD[indv]:
-            #    print(indv, breakD[indv])
-            #    pprint.pprint(list(zip(pos_int,mask)))
-            #    print('*'*30)
-        #plt.imshow(mask_mat, aspect=14, cmap='bone')
-        #plt.show()
-        #print(np.array(mask_mat).shape, q.shape)
+
         target.append(np.array(mask_mat, dtype='int8'))
-        if not len(f) % 100: print(len(f), f[-1].shape, target[-1].shape)
+    return f, pos, target, igD
+
+def load_data_ghost(msfile, introgressfile, max_len, nindv):
+    ig = list(get_gz_file(introgressfile))
+    igD = {}
+    for x in ig:
+        if x[0] == 'Begin':
+            n = int(x[-1])
+            igD[n] = {}
+        if x[0] == 'genome':
+            if len(x) > 2:
+                igD[n][int(x[1].replace(":", ""))] = [tuple(map(int,i.split('-'))) for i in x[-1].split(',')]
+            else:  igD[n][int(x[1].replace(":", ""))] = []           #print(n,x)
+    #pprint.pprint(igD)
+    g = list(get_gz_file(msfile))
+    loc_len = 10000.
+    #print(loc_len)
+    k = [idx for idx,i in enumerate(g) if len(i) > 0 and i[0].startswith('//')]
+    #print(k)
+    f, pos, target = [], [], []
+    for gdx,i in enumerate(k):
+        L = g[i+3:i+3+nindv]
+        p = [jj for jj in g[i+2][1:]]
+        q = []
+        kdx = 1
+        for i in L:
+            i = [int(j) for j in i[0]]
+
+            i = np.array(i, dtype=np.int8)
+            q.append(i)
+
+        q = np.array(q)
+
+        q = q.astype("int8")
+        f.append(np.array(q))
+        pos_int = np.array(p, dtype='float')
+
+        pos.append(pos_int)
+
+        mask_mat = []
+        breakD = igD[gdx]
+        for indv in range(len(breakD)):
+            mask = binary_digitizer(pos_int, breakD[indv])
+            mask_mat.append(mask)
+
+        target.append(np.array(mask_mat, dtype='int8'))
     return f, pos, target, igD
 
 def max_len_only(xfile):
