@@ -293,8 +293,7 @@ def main():
     # if we have multiple GPUs, save the single-GPU weights
     if gups > 1:
         multi_gpus_model = load_model(weightFileName)
-        origin_model = multi_gpus_model.layers[
-            -2]  # you can use multi_gpus_model.summary() to see the layer of the original model
+        origin_model = multi_gpus_model.layers[-2]  # you can use multi_gpus_model.summary() to see the layer of the original model
         origin_model.save_weights(singleGPUweightFileName)
 
 if __name__ == '__main__':
