@@ -87,6 +87,28 @@ def get_params(out):
 
     return np.array(ret)
 
+def get_params_ghost(out):
+    ret = []
+
+    # migTime, migProb12, migProb21
+    _ = []
+
+    ifile = open(out, 'r')
+    line = ifile.readline()
+
+    while line != '':
+        if 'migTime' in line:
+            _.append(int(line.replace('migTime: ', '').replace('\n', '')))
+        elif 'migProb' in line:
+            _.append(float(line.replace('migProb: ', '').replace('\n', '')))
+
+            ret.append(_)
+            _ = []
+
+        line = ifile.readline()
+
+    return np.array(ret)
+
 
 def add_channel(matrix):
     return matrix.reshape(matrix.shape + (1, ))
