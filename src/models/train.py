@@ -33,6 +33,7 @@ import logging
 from keras.callbacks import TensorBoard
 
 from keras.engine.input_layer import InputLayer
+from keras.models import load_model
 import h5py
 
 def relu_clipped(x):
@@ -129,6 +130,10 @@ def train_cnn_model(model, configFile, weightFileName, training_generator, valid
         model.compile(loss=mixed_loss,
                       optimizer='adam',
                       metrics=['accuracy', dice_coef_loss, 'binary_crossentropy', mixed_loss])
+    elif config.get('optimizer_params', 'loss') == 'categorical_crossentropy':
+        model.compile(loss='categorical_crossentropy',
+                      optimizer='adam',
+                      metrics=['accuracy'])
 
     # Tensor-board callback
     tbCallBack = TrainValTensorBoard(log_dir = tf_logdir, histogram_freq = 0, write_graph = True, write_images = True, write_grads = False, update_freq = 'epoch')
@@ -222,6 +227,7 @@ def main():
 
     # Get some output file names
     weightFileName = os.path.join(str(args.odir), '{0}.weights'.format(str(args.tag)))
+    singleGPUweightFileName = os.path.join(str(args.odir), '{0}.singleGPU.weights'.format(str(args.tag)))
     testPredFileName = os.path.join(str(args.odir), '{0}.classes'.format(str(args.tag)))
     modFileName = os.path.join(str(args.odir), '{0}.mdl'.format(str(args.tag)))
     evalFileName = os.path.join(str(args.odir), '{0}.evals'.format(str(args.tag)))
@@ -277,10 +283,19 @@ def main():
     validation_generator = DataGenerator(indices['val'], **params)
     test_generator = DataGenerator(indices['test'], **params)
 
+    print(len(training_generator), len(validation_generator), len(test_generator))
+
     history = train_cnn_model(model, args.train_config, weightFileName, training_generator, validation_generator, gpus, tf_logdir)
     evaluate_cnn_model(model, weightFileName, test_generator, testPredFileName, modFileName, evalFileName, gpus)
 
     pickle.dump(history.history, open(historyName, 'wb'))
+
+    # if we have multiple GPUs, save the single-GPU weights
+    if gups > 1:
+        multi_gpus_model = load_model(weightFileName)
+        origin_model = multi_gpus_model.layers[
+            -2]  # you can use multi_gpus_model.summary() to see the layer of the original model
+        origin_model.save_weights(singleGPUweightFileName)
 
 if __name__ == '__main__':
     main()
