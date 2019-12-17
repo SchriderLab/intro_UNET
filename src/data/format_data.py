@@ -14,7 +14,7 @@ def parse_args():
     # my args
     parser.add_argument("--verbose", action = "store_true", help = "display messages")
     parser.add_argument("--idir", default = "/proj/dschridelab/introgression_data/sims_raw_v1")
-    parser.add_argument("--ofile", default = "data_v1.0.hdf5")
+    parser.add_argument("--ofile", default = "None")
 
     parser.add_argument("--format_mode", default = "sort_NN")
 
