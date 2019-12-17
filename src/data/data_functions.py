@@ -2,7 +2,7 @@ import numpy as np
 from random import shuffle
 import gzip
 from matplotlib import pyplot as plt
-from sklearn.neighbors import NearestNeighbors
+#from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cdist, pdist
 import json,pprint
 
