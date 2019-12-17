@@ -87,11 +87,13 @@ def main():
 
     args = parse_args()
 
-    ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])
-    log_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'log.gz' in u])
-    out_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if '.out' in u])
+    ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])[:1]
+    log_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'log.gz' in u])[:1]
+    out_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if '.out' in u])[:1]
 
-    n_sims = int(args.n_per_file) * len(ms_files)
+    n_sims = 8
+
+    print(n_sims)
 
     if comm.rank != 0:
         for ix in range(comm.rank - 1, len(ms_files), comm.size - 1):
@@ -103,7 +105,7 @@ def main():
 
             X_data, P, itarget, iintrog_reg = load_data_ghost(ms, log, 128, int(args.n_individuals))
 
-            for k in range(len(X_data)):
+            for k in range(8):
                 logging.debug('{0}: working on file {1}, dataset {2}'.format(comm.rank, ix, k))
 
                 x = X_data[k]
@@ -143,6 +145,8 @@ def main():
                 X = x[:,middle_indices]
                 Y = y[:,middle_indices]
 
+                print(Y.shape)
+
                 comm.send([X, Y, np.array(features, dtype = np.float32), np.array(positions, dtype = np.uint8), p[k]], dest = 0)
 
     else:
@@ -166,6 +170,9 @@ def main():
 
             n_recieved += 1
 
+            if n_recieved % 10 == 0:
+                logging.debug('0: recieved {0} simulations'.format(n_recieved))
+
             X.append(x)
             Y.append(y)
             features.append(f)
@@ -176,7 +183,7 @@ def main():
                 ofile.create_dataset('{0}/x_0'.format(counter),
                                      data=add_channel(np.array(X[-batch_size:], dtype=np.uint8)), compression='lzf')
                 ofile.create_dataset('{0}/y'.format(counter),
-                                     data=add_channel(np.array(y[-batch_size:], dtype=np.uint8)), compression='lzf')
+                                     data=add_channel(np.array(Y[-batch_size:], dtype=np.uint8)), compression='lzf')
 
                 f, p = pad_matrices(features[-batch_size:], positions[-batch_size:])
 
@@ -193,6 +200,7 @@ def main():
 
                 counter += 1
 
+        logging.debug('0: closing file...')
         ofile.close()
 
 
