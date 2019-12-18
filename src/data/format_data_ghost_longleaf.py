@@ -93,6 +93,8 @@ def main():
     log = args.log
     out = args.out
 
+    batch_size = int(args.batch_size)
+
     p = get_params_ghost(out)
 
     X_data, P, itarget, iintrog_reg = load_data_ghost(ms, log, 128, int(args.n_individuals))
