@@ -34,7 +34,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    cmd = 'sbatch --wrap "python3 src/data/format_data_ghost_longleaf.py --ms {0} --log {1} --out {2} --ofile {3}"'
+    cmd = 'sbatch -t 1-00:00:00 --wrap "python3 src/data/format_data_ghost_longleaf.py --ms {0} --log {1} --out {2} --ofile {3}"'
 
     ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])
     log_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'log.gz' in u])
