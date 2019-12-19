@@ -53,7 +53,7 @@ def main():
 
     for bs, loss, model in todo:
 
-        tag = args.tag + '_{0}_{1}_{2}'.format(bs, loss, model)
+        tag = args.tag + '_{0}_{1}_{2}'.format(bs, loss, model.split('/')[-1].split('.')[0])
 
         cmd_ = cmd.format(model, args.data, args.odir, tag, bs, args.indices, os.path.join(config_dir, loss), args.n_gpus)
         print(cmd_)
