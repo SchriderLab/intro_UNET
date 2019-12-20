@@ -37,7 +37,7 @@ def main():
         ifile = h5py.File(os.path.join(args.idir, ifile), 'r')
 
         for key in keys_to_write:
-            ofile.create_dataset('{0}/{1}'.format(counter, key), data = np.array(ifile['0/{0}'.format(key)]))
+            ofile.create_dataset('{0}/{1}'.format(counter, key), data = np.array(ifile['0/{0}'.format(key)]), compression = 'lzf')
 
         counter += 1
 
