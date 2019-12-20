@@ -1,5 +1,7 @@
 import os
 import h5py
+import numpy
+import logging, argparse
 
 def parse_args():
     # Argument Parser
@@ -39,7 +41,11 @@ def main():
 
         counter += 1
 
+        ifile.close()
+
     ofile.close()
 
+if __name__ == '__main__':
+    main()
 
 
