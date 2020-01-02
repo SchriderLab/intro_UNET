@@ -87,13 +87,11 @@ def main():
 
     args = parse_args()
 
-    ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])[:1]
-    log_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'log.gz' in u])[:1]
-    out_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if '.out' in u])[:1]
+    ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])[:100]
+    log_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'log.gz' in u])[:100]
+    out_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if '.out' in u])[:100]
 
     n_sims = 8
-
-    print(n_sims)
 
     if comm.rank != 0:
         for ix in range(comm.rank - 1, len(ms_files), comm.size - 1):
@@ -105,7 +103,7 @@ def main():
 
             X_data, P, itarget, iintrog_reg = load_data_ghost(ms, log, 128, int(args.n_individuals))
 
-            for k in range(8):
+            for k in range(len(X_data)):
                 logging.debug('{0}: working on file {1}, dataset {2}'.format(comm.rank, ix, k))
 
                 x = X_data[k]
@@ -145,8 +143,6 @@ def main():
                 X = x[:,middle_indices]
                 Y = y[:,middle_indices]
 
-                print(Y.shape)
-
                 comm.send([X, Y, np.array(features, dtype = np.float32), np.array(positions, dtype = np.uint8), p[k]], dest = 0)
 
     else:
@@ -165,8 +161,6 @@ def main():
 
         while n_recieved < n_sims:
             x, y, f, pos, param = comm.recv(source = MPI.ANY_SOURCE)
-
-            print(f.shape, pos.shape)
 
             n_recieved += 1
 
