@@ -65,7 +65,7 @@ def parse_args():
     parser.add_argument("--format_mode", default = "sort_NN")
 
     parser.add_argument("--n_individuals", default = "64")
-    parser.add_argument("--n_per_file", default = "100")
+    parser.add_argument("--n_per_file", default = "8")
 
     parser.add_argument("--batch_size", default="8")
 
@@ -87,11 +87,11 @@ def main():
 
     args = parse_args()
 
-    ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])[:100]
-    log_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'log.gz' in u])[:100]
-    out_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if '.out' in u])[:100]
+    ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])
+    log_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'log.gz' in u])
+    out_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if '.out' in u])
 
-    n_sims = 8
+    n_sims = int(args.n_per_file)*len(ms_files)
 
     if comm.rank != 0:
         for ix in range(comm.rank - 1, len(ms_files), comm.size - 1):
@@ -104,7 +104,7 @@ def main():
             X_data, P, itarget, iintrog_reg = load_data_ghost(ms, log, 128, int(args.n_individuals))
 
             for k in range(len(X_data)):
-                logging.debug('{0}: working on file {1}, dataset {2}'.format(comm.rank, ix, k))
+                #logging.debug('{0}: working on file {1}, dataset {2}'.format(comm.rank, ix, k))
 
                 x = X_data[k]
                 ipos = P[k]
