@@ -74,10 +74,12 @@ class DataGenerator(keras.utils.Sequence):
 
         self.indices = copy.copy(self.o_indices)
 
+        sys.stdout.flush()
+
         return
 
     def __len__(self):
-        return int(np.floor(min(map(len, self.indices)) / self.n_chunks))
+        return int(np.floor(min(map(len, self.o_indices)) / self.n_chunks))
 
     def __getitem__(self, index):
         X = []
@@ -129,7 +131,7 @@ class DataGenerator(keras.utils.Sequence):
             params = np.vstack(params)
 
             return X, y, params
-                
+
         return X, y
         
 

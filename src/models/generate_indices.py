@@ -5,7 +5,6 @@ import pickle
 
 import h5py
 
-
 def get_partition_indices(batches, testProp, valProp):
     ret = dict()
 
