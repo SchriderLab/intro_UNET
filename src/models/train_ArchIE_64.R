@@ -1,5 +1,5 @@
 library(data.table)
-train <- data.frame(fread("../simulations/training_data.txt")) ## read in the training data
+train <- data.frame(fread("/pine/scr/d/d/ddray/archie_training_64.txt")) ## read in the training data
 
 LABEL_COL=73
 
