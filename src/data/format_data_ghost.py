@@ -181,8 +181,8 @@ def main():
 
                 f, p = pad_matrices(features[-batch_size:], positions[-batch_size:])
 
-                ofile.create_dataset('{0}/features'.format(counter), data = f, compression = 'lzf')
-                ofile.create_dataset('{0}/positions'.format(counter), data = p, compression = 'lzf')
+                ofile.create_dataset('{0}/features'.format(counter), data = f)
+                ofile.create_dataset('{0}/positions'.format(counter), data = p)
                 ofile.create_dataset('{0}/params'.format(counter), data=np.array(params[-batch_size:]),
                                      dtype=np.float32, compression='lzf')
 
