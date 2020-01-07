@@ -4,7 +4,7 @@ import itertools
 
 import platform
 
-batch_sizes = [48]
+batch_sizes = [24, 48, 96, 144, 192]
 losses = ['mixed']
 
 config_dir = 'training_configs'
