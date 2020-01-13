@@ -70,6 +70,7 @@ def parse_args():
     parser.add_argument("--batch_size", default="8")
 
     parser.add_argument("--ofile", default = "archie_data.hdf5")
+    parser.add_argument("--window_size", default = "150")
 
     args = parser.parse_args()
 
@@ -86,6 +87,8 @@ def main():
     comm = MPI.COMM_WORLD
 
     args = parse_args()
+
+    window_size = int(args.window_size)
 
     ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])
     log_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'log.gz' in u])
@@ -110,7 +113,7 @@ def main():
                 ipos = P[k]
                 y = itarget[k]
 
-                windows, middle_indices = get_windows(x, ipos)
+                windows, middle_indices = get_windows(x, ipos, window_size)
                 middle_pos = list(ipos[middle_indices])
 
                 features = []
@@ -201,3 +204,5 @@ def main():
 if __name__ == '__main__':
     main()
 
+# sbatch -p 528_queue -n 512 -t 1-00:00:00 --wrap "mpirun -oversubscribe python3 src/data/format_data_ghost.py
+# --idir /proj/dschridelab/introgression_data/sims_64_10e5_ghost/ --ofile /proj/dschridelab/ddray/archie_64_data.hdf5 --verbose"
