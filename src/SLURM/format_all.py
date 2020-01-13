@@ -31,11 +31,11 @@ def main():
     cmd = 'sbatch -t 1-00:00:00 --wrap "python3 src/data/format_data.py --idir {0} --format_mode {1} --n_individuals {2} --ofile {3} --verbose"'
 
     for directory in directories:
-        tag = directory.split('_')[0]
+        tag = directory.split('_')[-1]
 
         cmd_ = cmd.format(os.path.join(args.idir, directory), args.format_mode, args.n_individuals, os.path.join(args.odir, '{0}.hdf5'.format(tag)))
 
-        #os.system(cmd_)
+        os.system(cmd_)
         print(cmd_)
 
 if __name__ == '__main__':
