@@ -14,7 +14,7 @@ initialize()
 	defineConstant("archaicSplitTime", burnTime); // split immediately after burn-in
 	defineConstant("simEndTime", asInteger(burnTime+(1.2*subpopSize))); // archaic split is 1.2N gen ago
 	defineConstant("splitTime", asInteger(burnTime+(0.25*subpopSize))); // recent split is 0.2N gen ago
-	rMigTime = 0.2*subpopSize; //introgression 0.2N gen ago
+	rMigTime = asInteger(0.2*subpopSize); //introgression 0.2N gen ago
 	defineConstant("migTime", asInteger(simEndTime-rMigTime));
 	
 	cat("burnTime: " + burnTime + "\n");
