@@ -14,9 +14,11 @@ initialize()
 	initializeRecombinationRate(1e-5);
 		
 	defineConstant("burnTime", 20*subpopSize);
-	defineConstant("simEndTime", burnTime+(4*subpopSize)); //split time will be equal to burnTime, which is 4*subpopSize gen ago
+	defineConstant("splitTimeAgo", stCo*subpopSize); //we split 4*subpopSize gen ago
+	defineConstant("simEndTime", burnTime+splitTimeAgo); //split time will be equal to burnTime, which is 4*subpopSize gen ago
 	defineConstant("splitTime", burnTime);
-	rMigTime = rdunif(1, 0, 1*subpopSize); //introgression between 0 gen ago and 1*subpopSize gen ago
+    defineConstant("migTimeUpperBound", mtCo); //specifies the upper bound of our migration time in units of 4*subpopSize gen
+	rMigTime = rdunif(1, 0, asInteger(splitTimeAgo*migTimeUpperBound)); //introgression between 0 gen ago and 1*subpopSize gen ago
 	defineConstant("migTime", simEndTime-rMigTime);
 	
 	cat("burnTime: " + burnTime + "\n");
