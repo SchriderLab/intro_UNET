@@ -17,10 +17,12 @@ the script.
 test.lot contains some other information about each rep (including the values of some of the randomly drawn parameters)
 """
 
-scriptName, numReps, physLen, donorPop, introgLogFileName, nPerPop = sys.argv[1:]
+scriptName, numReps, physLen, donorPop, introgLogFileName, nPerPop, splitTimeCoefficient, migrationTimeCoefficient = sys.argv[1:]
 numReps = int(numReps)
 physLen = int(physLen)
 donorPop = int(donorPop)
+splitTimeCoefficient = int(splitTimeCoefficient)
+migrationTimeCoefficient = float(migrationTimeCoefficient)
 
 def parseFixations(fixationLines):
     fixations = []
@@ -203,7 +205,8 @@ for repIndex in range(numReps):
     sys.stderr.write("starting rep {}\n".format(repIndex))
     seed = random.randint(0, 2**32-1)
 
-    slimCmd = "slim -seed {} -d physLen={} -d sampleSizePerSubpop={} -d donorPop={} {}".format(seed, physLen, nPerPop, donorPop, scriptName)
+    slimCmd = "slim -seed {} -d physLen={} -d sampleSizePerSubpop={} -d donorPop={} -d stCo={} -d mtCo={} {}".format(seed, physLen, nPerPop, donorPop, splitTimeCoefficient, migrationTimeCoefficient, scriptName)
+    sys.stderr.write(slimCmd)
 
 
     procOut = subprocess.Popen(slimCmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
