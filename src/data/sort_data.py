@@ -64,12 +64,14 @@ def main():
             y_batch[k,:,:,0] = y
             feature_batch[k,:,:,:] = f
 
-
         data_X = ifile[key + '/x_0']
         data_X[...] = X_batch
 
         data_y = ifile[key + '/y']
         data_y[...] = y_batch
+
+        data_features = ifile[key + '/features']
+        data_features[...] = feature_batch
 
     ifile.close()
 
