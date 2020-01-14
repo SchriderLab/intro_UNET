@@ -43,7 +43,7 @@ def main():
         for k in range(len(X_batch)):
             X = copy.copy(X_batch[k,:,:,0])
             y = copy.copy(y_batch[k,:,:,0])
-            f = copy.copy(f[k,:,:,:])
+            f = copy.copy(feature_batch[k,:,:,:])
 
             if args.format_mode == 'sort_NN':
                 X, indices = sort_NN(X)
