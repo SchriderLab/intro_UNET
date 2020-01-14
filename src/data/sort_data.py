@@ -49,16 +49,16 @@ def main():
                 X, indices = sort_NN(X)
 
             elif args.format_mode == 'min_match_sorted':
-                X, indices = sort_cdist(x[k], opt='min', sort_pop=True)
+                X, indices = sort_cdist(X, opt='min', sort_pop=True)
 
             elif args.format_mode == 'max_match_sorted':
-                X, indices = sort_cdist(x[k], opt='max', sort_pop=True)
+                X, indices = sort_cdist(X, opt='max', sort_pop=True)
 
             elif args.format_mode == 'min_match':
-                X, indices = sort_cdist(x[k], opt='min', sort_pop=False)
+                X, indices = sort_cdist(X, opt='min', sort_pop=False)
 
             elif args.format_mode == 'max_match':
-                X, indices = sort_cdist(x[k], opt='max', sort_pop=False)
+                X, indices = sort_cdist(X, opt='max', sort_pop=False)
 
             f = f[:,list(np.argsort(indices[len(indices) // 2:])),:]
             y = y[indices]
