@@ -29,7 +29,7 @@ def main():
     args = parse_args()
 
     ifile = h5py.File(args.ifile, 'r')
-    ofile = h5py.File(args.ifile, 'w')
+    ofile = h5py.File(args.ofile, 'w')
 
     keys = list(ifile.keys())
 
