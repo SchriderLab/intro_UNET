@@ -74,6 +74,7 @@ def main():
         ofile.create_dataset(key + '/params', data = np.array(ifile[key + '/params']), compression = 'gzip')
 
     ifile.close()
+    ofile.close()
 
 if __name__ == '__main__':
     main()
