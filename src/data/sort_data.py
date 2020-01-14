@@ -60,7 +60,7 @@ def main():
             elif args.format_mode == 'max_match':
                 X, indices = sort_cdist(x[k], opt='max', sort_pop=False)
 
-            f = f[:,indices[len(indices) // 2:],:]
+            f = f[:,list(np.argsort(indices[len(indices) // 2:])),:]
             y = y[indices]
 
             X_batch[k,:,:,0] = X
