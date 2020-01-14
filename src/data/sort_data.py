@@ -12,6 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--verbose", action="store_true", help="display messages")
     parser.add_argument("--ifile", default = "None")
+    parser.add_argument("--ofile", default = "None")
     parser.add_argument("--format_mode", default = "sort_NN")
 
     args = parser.parse_args()
@@ -27,7 +28,9 @@ def parse_args():
 def main():
     args = parse_args()
 
-    ifile = h5py.File(args.ifile, 'r+')
+    ifile = h5py.File(args.ifile, 'r')
+    ofile = h5py.File(args.ifile, 'w')
+
     keys = list(ifile.keys())
 
     for key in keys:
@@ -64,14 +67,11 @@ def main():
             y_batch[k,:,:,0] = y
             feature_batch[k,:,:,:] = f
 
-        data_X = ifile[key + '/x_0']
-        data_X[...] = X_batch
-
-        data_y = ifile[key + '/y']
-        data_y[...] = y_batch
-
-        data_features = ifile[key + '/features']
-        data_features[...] = feature_batch
+        ofile.create_dataset(key + '/x_0', data = X_batch, compression = 'lzf')
+        ofile.create_dataset(key + 'y', data = y_batch, compression = 'lzf')
+        ofile.create_dataset(key + '/features', data = feature_batch, compression = 'gzip')
+        ofile.create_dataset(key + '/positions', data = np.array(ifile[key + '/positions']), compression = 'gzip')
+        ofile.create_dataset(key + '/params', data = np.array(ifile[key + '/params']), compression = 'gzip')
 
     ifile.close()
 
