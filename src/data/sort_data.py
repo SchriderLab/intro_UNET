@@ -68,7 +68,7 @@ def main():
             feature_batch[k,:,:,:] = f
 
         ofile.create_dataset(key + '/x_0', data = X_batch, compression = 'lzf')
-        ofile.create_dataset(key + 'y', data = y_batch, compression = 'lzf')
+        ofile.create_dataset(key + '/y', data = y_batch, compression = 'lzf')
         ofile.create_dataset(key + '/features', data = feature_batch, compression = 'gzip')
         ofile.create_dataset(key + '/positions', data = np.array(ifile[key + '/positions']), compression = 'gzip')
         ofile.create_dataset(key + '/params', data = np.array(ifile[key + '/params']), compression = 'gzip')
@@ -78,6 +78,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 
