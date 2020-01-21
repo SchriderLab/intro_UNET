@@ -184,8 +184,8 @@ def main():
 
                 f, p = pad_matrices(features[-batch_size:], positions[-batch_size:])
 
-                ofile.create_dataset('{0}/features'.format(counter), data = f)
-                ofile.create_dataset('{0}/positions'.format(counter), data = p)
+                ofile.create_dataset('{0}/features'.format(counter), data = f, compression = 'gzip')
+                ofile.create_dataset('{0}/positions'.format(counter), data = p, compression = 'gzip')
                 ofile.create_dataset('{0}/params'.format(counter), data=np.array(params[-batch_size:]),
                                      dtype=np.float32, compression='lzf')
 
@@ -204,5 +204,4 @@ def main():
 if __name__ == '__main__':
     main()
 
-# sbatch -p 528_queue -n 512 -t 1-00:00:00 --wrap "mpirun -oversubscribe python3 src/data/format_data_ghost.py
-# --idir /proj/dschridelab/introgression_data/sims_64_10e5_ghost/ --ofile /proj/dschridelab/ddray/archie_64_data.hdf5 --verbose"
+# sbatch -p 528_queue -n 512 -t 1-00:00:00 --wrap "mpirun -oversubscribe python3 src/data/format_data_ghost.py --idir /proj/dschridelab/introgression_data/sims_64_10e5_ghost/ --ofile /proj/dschridelab/ddray/archie_64_data.hdf5 --verbose"
