@@ -292,7 +292,7 @@ def main():
 
     # if we have multiple GPUs, save the single-GPU weights
     if gpus > 1:
-        multi_gpus_model = load_model(weightFileName, custom_objects={'mixed_loss': mixed_loss})
+        multi_gpus_model = load_model(weightFileName, custom_objects={'mixed_loss': mixed_loss, 'dice_coef_loss': dice_coef_loss})
         origin_model = multi_gpus_model.layers[-2]  # you can use multi_gpus_model.summary() to see the layer of the original model
         origin_model.save_weights(singleGPUweightFileName)
 
