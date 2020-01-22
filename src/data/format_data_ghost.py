@@ -14,7 +14,7 @@ from mpi4py import MPI
 def get_feature_vector(mutation_positions, genotypes, ref_geno, arch):
     n_samples = len(genotypes[0])
 
-    n_sites = 150
+    n_sites = 50000
 
     ## set up S* stuff -- remove mutations found in reference set
     t_ref = list(map(list, zip(*ref_geno)))
