@@ -2,12 +2,12 @@
 
 initialize()
 {
-	initializeMutationRate(8.33333e-5);
+	initializeMutationRate(1.25e-8);
 	initializeMutationType("m1", 0.5, "f", 0.0);// introduced mutation
 	initializeMutationType("m3", 0.5, "f", 0.0);// normal mutation
 	initializeGenomicElementType("g1", m3, 1.0);
 	initializeGenomicElement(g1, 0, physLen-1);
-	initializeRecombinationRate(6.66667e-5);
+	initializeRecombinationRate(1e-8);
 
 	defineConstant("subpopSize", 500);		
 	defineConstant("burnTime", 20*subpopSize);
