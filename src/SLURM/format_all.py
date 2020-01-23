@@ -35,7 +35,7 @@ def main():
 
         cmd_ = cmd.format(os.path.join(args.idir, directory), args.format_mode, args.n_individuals, os.path.join(args.odir, '{0}.hdf5'.format(tag)))
 
-        #os.system(cmd_)
+        os.system(cmd_)
         print(cmd_)
 
 if __name__ == '__main__':
