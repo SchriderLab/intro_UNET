@@ -31,7 +31,7 @@ def main():
     cmd = 'sbatch -t 1-00:00:00 --wrap "python3 src/data/format_data.py --idir {0} --format_mode {1} --n_individuals {2} --ofile {3} --verbose"'
 
     for directory in directories:
-        tag = directory.split('_')[-1]
+        tag = directory
 
         cmd_ = cmd.format(os.path.join(args.idir, directory), args.format_mode, args.n_individuals, os.path.join(args.odir, '{0}.hdf5'.format(tag)))
 
@@ -43,3 +43,5 @@ if __name__ == '__main__':
 
 # no_sorting/bi
 # max_match_sorted/bi
+
+# python3 src/SLURM/evaluate_network.py --idir architectures/var_size/ --data /proj/dschridelab/ddray/intro_data/ArchIE_data/max_match.hdf5 --indices archie_64_indices.pkl --odir /pine/scr/d/d/ddray/ArchIE_grids/max_match --tag ArchIE
