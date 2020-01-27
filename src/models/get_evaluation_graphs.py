@@ -114,7 +114,7 @@ def main():
     y_true = []
     y_pred = []
 
-    for ix in range(50):
+    for ix in range(len(generator)):
         X, y, params = generator[ix]
 
         y_ = model.predict(X)
@@ -137,33 +137,6 @@ def main():
 
     result['confusion matrix'] = confusion_matrix(y_true, np.round(y_pred))
     result['accuracy'] = accuracy_score(y_true, np.round(y_pred))
-
-    plt.rc('font', family='Arial', size=11)  # set to Arial/Helvetica
-    plt.rcParams.update({'figure.autolayout': True})
-    fig = plt.figure(figsize=(8, 8), dpi=100)
-
-    ax = fig.add_subplot(1, 1, 1)
-    ax.plot(fpr, tpr)
-    ax.plot([0,1], [0, 1])
-
-    ax.set_xlabel('false positive rate')
-    ax.set_ylabel('true positive rate')
-
-    plt.show()
-    plt.close()
-
-    plt.rc('font', family='Arial', size=11)  # set to Arial/Helvetica
-    plt.rcParams.update({'figure.autolayout': True})
-    fig = plt.figure(figsize=(8, 8), dpi=100)
-
-    ax = fig.add_subplot(1, 1, 1)
-    ax.plot(recall, precision)
-
-    ax.set_xlabel('recall')
-    ax.set_ylabel('precision')
-
-    plt.show()
-    plt.close()
 
     pickle.dump(result, open(args.ofile, 'wb'))
 
