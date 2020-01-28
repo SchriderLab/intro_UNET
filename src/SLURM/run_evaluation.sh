@@ -2,7 +2,7 @@
 #SBATCH --job-name=cnn_binary_class_gpu
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=35G
+#SBATCH --mem=256G
 
 unset OMP_NUM_THREADS
 
