@@ -3,7 +3,6 @@ This code is based off of https://stanford.edu/~shervine/blog/keras-how-to-gener
 """
 import sys
 import numpy as np
-import psutil
 import keras
 from keras.utils import to_categorical
 import random
