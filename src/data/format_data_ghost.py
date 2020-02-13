@@ -70,7 +70,9 @@ def parse_args():
     parser.add_argument("--batch_size", default="8")
 
     parser.add_argument("--ofile", default = "archie_data.hdf5")
-    parser.add_argument("--window_size", default = "150")
+    parser.add_argument("--window_size", default = "50000")
+
+    parser.add_argument("--n_files", default = "1250")
 
     args = parser.parse_args()
 
@@ -90,9 +92,9 @@ def main():
 
     window_size = int(args.window_size)
 
-    ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])
-    log_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'log.gz' in u])
-    out_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if '.out' in u])
+    ms_files = sorted([os.path.join(idir, u) for u in os.listdir(idir) if 'ms.gz' in u])
+    log_files = sorted([os.path.join(idir, u) for u in os.listdir(idir) if 'log.gz' in u])
+    out_files = sorted([os.path.join(idir, u) for u in os.listdir(idir) if '.out' in u])
 
     n_sims = int(args.n_per_file)*len(ms_files)
 
@@ -189,6 +191,8 @@ def main():
                 ofile.create_dataset('{0}/params'.format(counter), data=np.array(params[-batch_size:]),
                                      dtype=np.float32, compression='lzf')
 
+                ofile.flush()
+
                 del X[-batch_size:]
                 del Y[-batch_size:]
                 del features[-batch_size:]
@@ -205,3 +209,4 @@ if __name__ == '__main__':
     main()
 
 # sbatch -p 528_queue -n 512 -t 1-00:00:00 --wrap "mpirun -oversubscribe python3 src/data/format_data_ghost.py --idir /proj/dschridelab/introgression_data/sims_64_10e5_ghost/ --ofile /proj/dschridelab/ddray/archie_64_data.hdf5 --verbose"
+# sbatch -p 528_queue -n 512 -t 1-00:00:00 --wrap "mpirun -oversubscribe python3 src/data/format_data_ghost.py --idir /proj/dschridelab/introgression_data/sims_200_10e5_ghost/ --ofile /proj/dschridelab/ddray/archie_200_data.hdf5 --verbose --n_individuals 200 --window_size 50000"
