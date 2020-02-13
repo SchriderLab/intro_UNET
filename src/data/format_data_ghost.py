@@ -92,9 +92,9 @@ def main():
 
     window_size = int(args.window_size)
 
-    ms_files = sorted([os.path.join(idir, u) for u in os.listdir(idir) if 'ms.gz' in u])
-    log_files = sorted([os.path.join(idir, u) for u in os.listdir(idir) if 'log.gz' in u])
-    out_files = sorted([os.path.join(idir, u) for u in os.listdir(idir) if '.out' in u])
+    ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])
+    log_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'log.gz' in u])
+    out_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if '.out' in u])
 
     n_sims = int(args.n_per_file)*len(ms_files)
 
