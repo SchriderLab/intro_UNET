@@ -51,7 +51,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     # my args
     parser.add_argument("--verbose", action = "store_true", help = "display messages")
-    parser.add_argument("--weights", default = "weights/densenet169_48_final.weights")
+    parser.add_argument("--weights", default = "weights/dn169.weights")
     parser.add_argument("--model", default = "architectures/var_size/densenet169.json")
 
     parser.add_argument("--indices", default = "indices/128/128_10e5_all.pkl")
