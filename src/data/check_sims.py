@@ -30,6 +30,8 @@ def main():
     for ix in range(len(ms_files)):
         ms = ms_files[ix]
         log = log_files[ix]
+
+        print(ix)
         try:
             X_data, P, itarget, iintrog_reg = load_data_ghost(ms, log, 128, 200)
         except:
