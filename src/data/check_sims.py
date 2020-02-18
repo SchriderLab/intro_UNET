@@ -28,8 +28,10 @@ def main():
     out_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if '.out' in u])
 
     for ix in range(len(ms_files)):
+        ms = ms_files[ix]
+        log = log_files[ix]
         try:
-            X_data, P, itarget, iintrog_reg = load_data_ghost(ms, log, 128, int(args.n_individuals))
+            X_data, P, itarget, iintrog_reg = load_data_ghost(ms, log, 128, 200)
         except:
             print(ms)
             print(log)
