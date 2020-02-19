@@ -44,24 +44,22 @@ def get_y_vec(index, models):
 
 class DataGenerator(keras.utils.Sequence):
     'Generates data for Keras'
-    def __init__(self, indices, ifiles, n_inputs, gen_size, input_shapes, trim = 0, get_params = False):
+    def __init__(self, indices, ifiles, n_inputs, gen_size, input_shapes, get_params = False):
         self.indices = indices
         self.ifiles = ifiles
         self.gen_size = gen_size
         self.n_inputs = n_inputs
         self.input_shapes = input_shapes
 
-        self.trim = trim
-
         self.o_indices = copy.copy(indices)
 
         self.get_params = get_params
 
         # grab the pre-set batch size
-        self.igen_size = ifiles[0]['0/x_0'].shape[0]
+        self.igen_size = ifiles[0][list(ifiles[0].keys())[0] + '/x_0'].shape[0]
 
         # check for pre-defined y
-        if not 'y' in ifiles[0]['0'].keys():
+        if not 'y' in ifiles[0][list(ifiles[0].keys())[0]].keys():
             # y will be the same in every case for categorical, simply a balanced set of answers
             self.y = create_y(self.gen_size, len(ifiles))
         else:
@@ -101,7 +99,7 @@ class DataGenerator(keras.utils.Sequence):
 
             for i in range(len(self.ifiles)):
                 for j in range(self.n_chunks):
-                    x.append(np.array(self.ifiles[i]['{0}/x_{1}'.format(indices_[i][j], k)])[:,self.trim:-self.trim,:,:])
+                    x.append(np.array(self.ifiles[i]['{0}/x_{1}'.format(indices_[i][j], k)]))
                     
             x = np.vstack(x)
             
@@ -132,6 +130,7 @@ class DataGenerator(keras.utils.Sequence):
             params = np.vstack(params)
 
             return X, y, params
+
 
         return X, y
         

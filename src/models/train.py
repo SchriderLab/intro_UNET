@@ -274,8 +274,7 @@ def main():
     params = {'ifiles': ifiles,
         'n_inputs': n_inputs,
         'gen_size': gen_size,
-        'input_shapes': input_shapes,
-        'trim': int(args.trim)
+        'input_shapes': input_shapes
         }
 
     print(params)
