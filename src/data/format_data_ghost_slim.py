@@ -117,10 +117,13 @@ def main():
 
                 windows, middle_indices = get_windows(x, ipos, window_size)
 
-                X = x[:,middle_indices]
-                Y = y[:,middle_indices]
+                X = x[4:-4,middle_indices]
+                Y = y[4:-4,middle_indices]
 
-
+                if args.format_mode == 'sort_NN':
+                    X, indices = sort_NN(X)
+                    Y = Y[indices]
+                    
                 comm.send([X, Y, p[k]], dest = 0)
 
     else:
