@@ -44,12 +44,14 @@ def get_y_vec(index, models):
 
 class DataGenerator(keras.utils.Sequence):
     'Generates data for Keras'
-    def __init__(self, indices, ifiles, n_inputs, gen_size, input_shapes, get_params = False):
+    def __init__(self, indices, ifiles, n_inputs, gen_size, input_shapes, trim = 0, get_params = False):
         self.indices = indices
         self.ifiles = ifiles
         self.gen_size = gen_size
         self.n_inputs = n_inputs
         self.input_shapes = input_shapes
+
+        self.trim = trim
 
         self.o_indices = copy.copy(indices)
 
@@ -99,7 +101,7 @@ class DataGenerator(keras.utils.Sequence):
 
             for i in range(len(self.ifiles)):
                 for j in range(self.n_chunks):
-                    x.append(np.array(self.ifiles[i]['{0}/x_{1}'.format(indices_[i][j], k)]))
+                    x.append(np.array(self.ifiles[i]['{0}/x_{1}'.format(indices_[i][j], k)])[:,self.trim:-self.trim,:,:])
                     
             x = np.vstack(x)
             

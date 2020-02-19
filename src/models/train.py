@@ -199,6 +199,8 @@ def parse_args():
     parser.add_argument("--indices", default = "None")
     parser.add_argument("--weights", default = "None")
 
+    parser.add_argument("--trim", default = "0")
+
     args = parser.parse_args()
 
     if args.verbose:
@@ -273,6 +275,7 @@ def main():
         'n_inputs': n_inputs,
         'gen_size': gen_size,
         'input_shapes': input_shapes,
+        'trim': int(args.trim)
         }
 
     print(params)
