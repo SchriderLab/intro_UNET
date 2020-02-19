@@ -120,8 +120,8 @@ def main():
                 X = x[:,middle_indices]
                 Y = y[:,middle_indices]
 
-                if np.sum(Y) > 0:
-                    comm.send([X, Y, p[k]], dest = 0)
+
+                comm.send([X, Y, p[k]], dest = 0)
 
     else:
         ofile = h5py.File(args.ofile, 'w')
@@ -143,9 +143,11 @@ def main():
             if n_recieved % 10 == 0:
                 logging.debug('0: recieved {0} simulations'.format(n_recieved))
 
-            X.append(x)
-            Y.append(y)
-            params.append(param)
+
+            if np.sum(y) > 0:
+                X.append(x)
+                Y.append(y)
+                params.append(param)
 
             while len(X) >= batch_size:
                 ofile.create_dataset('{0}/x_0'.format(counter),
