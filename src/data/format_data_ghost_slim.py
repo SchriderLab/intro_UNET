@@ -120,7 +120,8 @@ def main():
                 X = x[:,middle_indices]
                 Y = y[:,middle_indices]
 
-                comm.send([X, Y, p[k]], dest = 0)
+                if np.sum(Y) > 0:
+                    comm.send([X, Y, p[k]], dest = 0)
 
     else:
         ofile = h5py.File(args.ofile, 'w')
