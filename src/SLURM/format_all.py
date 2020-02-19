@@ -20,6 +20,10 @@ def parse_args():
     else:
         logging.basicConfig(level=logging.INFO)
 
+    if not os.path.exists(args.odir):
+        os.mkdir(args.odir)
+        logging.debug('root: made output directory {0}'.format(args.odir))
+
     return args
 
 def main():
