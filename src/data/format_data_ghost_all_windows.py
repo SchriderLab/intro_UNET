@@ -115,7 +115,7 @@ def main():
                 ipos = P[k]
                 y = itarget[k]
 
-                windows, middle_indices = get_windows(x, ipos, window_size)
+                windows, middle_indices = get_windows_snps(x, ipos)
                 middle_pos = list(ipos[middle_indices])
 
                 X = []
@@ -143,9 +143,7 @@ def main():
                 X = np.array(X, dtype = np.uint8)
                 Y = np.array(Y, dtype = np.uint8)
 
-
                 comm.send([X, Y, positions, p[k], x[4:-4,middle_indices], y[4:-4,middle_indices]], dest = 0)
-
     else:
         ofile = h5py.File(args.ofile, 'w')
 
