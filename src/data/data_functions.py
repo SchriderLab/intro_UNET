@@ -65,6 +65,28 @@ def get_windows(x, ipos, wsize = 500):
 
     return ret, indices
 
+def get_windows_snps(x, ipos):
+    ipos = list(ipos)
+
+    indices = range(x.shape[1])
+    middle_index = findMiddle(indices)
+
+    indices = range(middle_index - 64, middle_index + 64)
+    sets = []
+
+    for ix in indices:
+        sets.append(ipos[ix - 64: ix + 64])
+
+    sets = [sorted(list(u)) for u in sets]
+    sets = sorted(sets, key = lambda u: u[0])
+
+    ret = []
+
+    for s in sets:
+        ret.append([ipos.index(u) for u in s])
+
+    return ret, indices
+
 def get_params(out):
     ret = []
 
