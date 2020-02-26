@@ -74,8 +74,14 @@ def get_windows_snps(x, ipos):
     indices = range(middle_index - 64, middle_index + 64)
     sets = []
 
+    for ix in indices[:63]:
+        sets.append(ipos[ix + 1 - 128:ix + 1])
+
     for ix in indices:
         sets.append(ipos[ix - 64: ix + 64])
+
+    for ix in indices[64:]:
+        sets.append(ipos[ix:ix + 128])
 
     sets = [sorted(list(u)) for u in sets]
     sets = sorted(sets, key = lambda u: u[0])
