@@ -4,7 +4,7 @@ import itertools
 
 import platform
 
-batch_sizes = [24, 48, 96]
+batch_sizes = [32, 64, 96]
 losses = ['mixed']
 
 config_dir = 'training_configs'
@@ -58,7 +58,7 @@ def main():
         cmd_ = cmd.format(model, args.data, args.odir, tag, bs, args.indices, os.path.join(config_dir, loss), args.n_gpus)
         print(cmd_)
 
-        os.system(cmd_)
+        #os.system(cmd_)
 
 if __name__ == '__main__':
     main()
