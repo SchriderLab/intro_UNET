@@ -58,7 +58,7 @@ def main():
         cmd_ = cmd.format(model, args.data, args.odir, tag, bs, args.indices, os.path.join(config_dir, loss), args.n_gpus)
         print(cmd_)
 
-        #os.system(cmd_)
+        os.system(cmd_)
 
 if __name__ == '__main__':
     main()
