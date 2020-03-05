@@ -17,12 +17,13 @@ the script.
 test.lot contains some other information about each rep (including the values of some of the randomly drawn parameters)
 """
 
-scriptName, numReps, physLen, donorPop, introgLogFileName, nPerPop, splitTimeCoefficient, migrationTimeCoefficient = sys.argv[1:]
+scriptName, numReps, physLen, donorPop, introgLogFileName, nPerPop, splitTimeCoefficient, migrationTimeCoefficient, migrationProbability = sys.argv[1:]
 numReps = int(numReps)
 physLen = int(physLen)
 donorPop = int(donorPop)
-splitTimeCoefficient = int(splitTimeCoefficient)
+splitTimeCoefficient = float(splitTimeCoefficient)
 migrationTimeCoefficient = float(migrationTimeCoefficient)
+migrationProbability = float(migrationProbability)
 
 def parseFixations(fixationLines):
     fixations = []
@@ -205,7 +206,7 @@ for repIndex in range(numReps):
     sys.stderr.write("starting rep {}\n".format(repIndex))
     seed = random.randint(0, 2**32-1)
 
-    slimCmd = "slim -seed {} -d physLen={} -d sampleSizePerSubpop={} -d donorPop={} -d stCo={} -d mtCo={} {}".format(seed, physLen, nPerPop, donorPop, splitTimeCoefficient, migrationTimeCoefficient, scriptName)
+    slimCmd = "slim -seed {} -d physLen={} -d sampleSizePerSubpop={} -d donorPop={} -d st={} -d mt={} -d mp={} {}".format(seed, physLen, nPerPop, donorPop, splitTimeCoefficient, migrationTimeCoefficient, migrationProbability, scriptName)
     sys.stderr.write(slimCmd)
 
 
