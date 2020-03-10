@@ -168,15 +168,16 @@ def main():
                 logging.debug('0: recieved {0} simulations'.format(n_recieved))
 
 
-            if np.sum(y) > 0:
-                X.append(x)
-                Y.append(y)
-                positions.append(pos)
-                X_windows.append(Xw)
-                Y_windows.append(Yw)
-                params.append(param)
+
+            X.append(x)
+            Y.append(y)
+            positions.append(pos)
+            X_windows.append(Xw)
+            Y_windows.append(Yw)
+            params.append(param)
 
             while len(X) >= batch_size:
+
                 ofile.create_dataset('{0}/x_0'.format(counter),
                                      data=add_channel(np.array(X[-batch_size:], dtype=np.uint8)), compression='lzf')
                 ofile.create_dataset('{0}/y'.format(counter),
