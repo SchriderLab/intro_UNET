@@ -18,7 +18,7 @@ def parse_args():
     # my args
     parser.add_argument("--verbose", action = "store_true", help = "display messages")
 
-    parser.add_argument("--ifile", default = "archie_200_data_all_windows.hdf5")
+    parser.add_argument("--ifile", default = "archie_data_all_windows.hdf5")
     parser.add_argument("--ofile", default = "archie_200_sample.hdf5")
 
     parser.add_argument("--n_samples", default = "1000")
@@ -71,6 +71,7 @@ def main():
                 todo[key].append((c[1], c[2]))
 
     for key in todo.keys():
+
         x = np.array(ifile['{0}/x_windows'.format(key)])
         y = np.array(ifile['{0}/y_windows'.format(key)])
 
