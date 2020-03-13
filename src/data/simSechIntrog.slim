@@ -1,0 +1,139 @@
+// Keywords: tracking introgressed haplotypes
+
+initialize()
+{
+
+	//defineConstant("physLen", 10000);
+	//defineConstant("sampleSizeSubpop1", 20);
+	//defineConstant("sampleSizeSubpop2", 14);
+	defineConstant("popSizeRescaleFactor", 0.01);
+	defineConstant("splitTimeAgo", asInteger(round(1290000*popSizeRescaleFactor)));
+	defineConstant("Nanc", asInteger(round(490000*popSizeRescaleFactor)));
+	defineConstant("Nsim", asInteger(round(120000*popSizeRescaleFactor)));
+	defineConstant("Nsim0", asInteger(round(9300000*popSizeRescaleFactor)));
+	defineConstant("Nsech", asInteger(round(4900000*popSizeRescaleFactor)));
+	defineConstant("Nsech0", asInteger(round(26000*popSizeRescaleFactor)));
+	defineConstant("simPopSizeChangeRate", exp(log(Nsim0/Nsim)/splitTimeAgo));
+	defineConstant("sechPopSizeChangeRate", exp(log(Nsech0/Nsech)/splitTimeAgo));
+	
+	initializeMutationRate(5e-9);
+	initializeMutationType("m1", 0.5, "f", 0.0);// introduced mutation
+	initializeMutationType("m2", 0.5, "f", 0.0);// introduced mutation
+	initializeMutationType("m3", 0.5, "f", 0.0);// normal mutation
+	initializeGenomicElementType("g1", m3, 1.0);
+	initializeGenomicElement(g1, 0, physLen-1);
+	initializeRecombinationRate(2e-8);
+		
+	defineConstant("burnTime", asInteger(round(20*Nanc*popSizeRescaleFactor)));
+	defineConstant("simEndTime", burnTime+splitTimeAgo); //split time will be equal to burnTime, which is 4*subpopSize gen ago
+	defineConstant("splitTime", burnTime);
+	defineConstant("migTimeUpperBound", 1.0); //specifies the upper bound of our migration time as a fraction of the time since the split
+	rMigTime = rdunif(1, 0, asInteger(round(splitTimeAgo*migTimeUpperBound))); //introgression between 0 gen ago and splitTimeAgo gen ago
+	defineConstant("migTime", simEndTime-rMigTime);
+	
+	cat("burnTime: " + burnTime + "\n");
+	cat("splitTime: " + splitTime + "\n");
+	cat("migTime: " + migTime + "\n");
+	cat("simEndTime: " + simEndTime + "\n");
+	cat("donorPop: " + donorPop + "\n");
+	cat("Nanc: " + Nanc + "\n");
+	cat("Nsim: " + Nsim + "\n");
+	cat("Nsim0: " + Nsim0 + "\n");
+	cat("Nsech: " + Nsech + "\n");
+	cat("Nsech0: " + Nsech0 + "\n");
+	cat("simPopSizeChangeRate: " + simPopSizeChangeRate + "\n");
+	cat("sechPopSizeChangeRate: " + sechPopSizeChangeRate + "\n");
+	
+	if (donorPop == 1)
+	{
+		rMigProb = runif(1, 0.1, 0.5);
+		defineConstant("migProb12", rMigProb);
+		defineConstant("migProb21", 0);
+	}
+	else if (donorPop == 2)
+	{
+		rMigProb = runif(1, 0.1, 0.5);
+		defineConstant("migProb12", 0);
+		defineConstant("migProb21", rMigProb);
+	}
+	else if (donorPop == 3)
+	{
+		rMigProb12 = runif(1, 0.1, 0.5);
+		rMigProb21 = runif(1, 0.1, 0.5);
+		defineConstant("migProb12", rMigProb12/2);
+		defineConstant("migProb21", rMigProb21/2);
+	}
+	else
+	{
+		defineConstant("migProb12", 0);
+		defineConstant("migProb21", 0);
+	}
+	cat("migProbs: " + migProb12 + ", " + migProb21 + "\n");
+}
+
+s1 1000 // split and set our initial population sizes
+{
+	cat("Splitting off subpop 2 at generation " + sim.generation + "\n");
+	sim.addSubpopSplit("p2", Nsech, p1);
+	p1.setSubpopulationSize(Nsim);
+	p1.setMigrationRates(p2, 0);
+	p2.setMigrationRates(p1, 0);
+}
+
+s2 1000:1099 { // exponential population size change in both subpopulations
+	//cat("Exponential growth in both subpops at generation " + sim.generation + "\n");
+	//cat("old pop sizes: " + p1.individualCount + " and " + p2.individualCount + "\n");
+	newSize1 = asInteger(Nsim * simPopSizeChangeRate^(sim.generation-splitTime));
+	newSize2 = asInteger(Nsech * sechPopSizeChangeRate^(sim.generation-splitTime));
+	p1.setSubpopulationSize(newSize1);
+	p2.setSubpopulationSize(newSize2);
+	//cat("new pop sizes: " + newSize1 + " and " + newSize2 + "\n");
+}
+
+s3 2000
+{
+	cat("Introgression happening at generation " + sim.generation + "\n");
+	p1.genomes.addNewMutation(m1, 0.0, 0:(physLen-1));
+	p2.genomes.addNewMutation(m2, 0.0, 0:(physLen-1));
+	p1.setMigrationRates(p2, migProb21);
+	p2.setMigrationRates(p1, migProb12);
+}
+
+s4 2000
+{
+	cat("Introgression finished at generation " + sim.generation + "\n");
+	p1.setMigrationRates(p2, 0);
+	p2.setMigrationRates(p1, 0);
+}
+
+s5 3000 late()
+{
+	cat("Wrapping up at generation " + sim.generation + "\n");
+	cat("Final population sizes; " + p1.individualCount + " and " + p2.individualCount + "; should be " + Nsim0 + " and " + Nsech0 + "\n");
+	cat("Sampling at generation " + sim.generation + "\n");
+	cat("Emitting fixations\n");
+	sim.outputFixedMutations();
+	cat("Done with fixations\n");
+	pop1SampGenomes = sample(p1.genomes, sampleSizeSubpop1);
+	pop2SampGenomes = sample(p2.genomes, sampleSizeSubpop2);
+	fullSamp = c(pop1SampGenomes, pop2SampGenomes);
+	fullSamp.output();
+	cat("Done emitting sample\n");
+	sim.simulationFinished();
+}
+
+1 {
+	// save this run's identifier, used to save and restore
+	defineConstant("simID", getSeed());
+	
+	// add our subpop
+	cat("Adding ancestral pop at generation " + sim.generation + "\n");
+	sim.addSubpop("p1", Nanc);
+	
+	//schedule our events
+	sim.rescheduleScriptBlock(s1, start=splitTime, end=splitTime);
+	sim.rescheduleScriptBlock(s2, start=splitTime, end=simEndTime);
+	sim.rescheduleScriptBlock(s3, start=migTime, end=migTime);
+	sim.rescheduleScriptBlock(s4, start=migTime+1, end=migTime+1);
+	sim.rescheduleScriptBlock(s5, start=simEndTime, end=simEndTime);
+}
