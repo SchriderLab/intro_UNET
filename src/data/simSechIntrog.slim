@@ -16,13 +16,13 @@ initialize()
 	defineConstant("simPopSizeChangeRate", exp(log(Nsim0/Nsim)/splitTimeAgo));
 	defineConstant("sechPopSizeChangeRate", exp(log(Nsech0/Nsech)/splitTimeAgo));
 	
-	initializeMutationRate(5e-9);
+	initializeMutationRate(5e-9/popSizeRescaleFactor);
 	initializeMutationType("m1", 0.5, "f", 0.0);// introduced mutation
 	initializeMutationType("m2", 0.5, "f", 0.0);// introduced mutation
 	initializeMutationType("m3", 0.5, "f", 0.0);// normal mutation
 	initializeGenomicElementType("g1", m3, 1.0);
 	initializeGenomicElement(g1, 0, physLen-1);
-	initializeRecombinationRate(2e-8);
+	initializeRecombinationRate(2e-8/popSizeRescaleFactor);
 		
 	defineConstant("burnTime", asInteger(round(20*Nanc*popSizeRescaleFactor)));
 	defineConstant("simEndTime", burnTime+splitTimeAgo); //split time will be equal to burnTime, which is 4*subpopSize gen ago
