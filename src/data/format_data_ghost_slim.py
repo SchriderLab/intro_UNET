@@ -142,11 +142,9 @@ def main():
             if n_recieved % 10 == 0:
                 logging.debug('0: recieved {0} simulations'.format(n_recieved))
 
-
-            if np.sum(y) > 0:
-                X.append(x)
-                Y.append(y)
-                params.append(param)
+            X.append(x)
+            Y.append(y)
+            params.append(param)
 
             while len(X) >= batch_size:
                 ofile.create_dataset('{0}/x_0'.format(counter),
