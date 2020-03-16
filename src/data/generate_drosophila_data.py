@@ -1,0 +1,55 @@
+import os
+import numpy as np
+import logging, argparse
+
+def parse_args():
+    # Argument Parser
+    parser = argparse.ArgumentParser()
+    # my args
+    parser.add_argument("--verbose", action = "store_true", help = "display messages")
+    parser.add_argument("--odir", default = "/proj/dschridelab/introgression_data/")
+    parser.add_argument("--n_jobs", default="1000")
+    parser.add_argument("--n_replicates", default="100000")
+
+    parser.add_argument("--donor_pop", default = "1")
+
+    args = parser.parse_args()
+
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+        logging.debug("running in verbose mode")
+    else:
+        logging.basicConfig(level=logging.INFO)
+
+    if not os.path.exists(args.odir):
+        os.mkdir(args.odir)
+        logging.debug('root: made output directory {0}'.format(args.odir))
+    else:
+        os.system('rm -rf {0}'.format(os.path.join(args.odir, '*')))
+
+    return args
+
+def main():
+    args = parse_args()
+
+    n_jobs = int(args.n_jobs)
+    n_replicates = int(args.n_replicates)
+
+    replicates_per = n_replicates // n_jobs
+
+    cmd = 'sbatch -o {4} --mem=8g -t 2-00:00:00 --wrap "python3 src/data/runAndParseSlimSimSech.py src/data/simSechIntrog.slim {0} 10000 {1} {2} 1> {3} 20 14"'
+
+    counter = 0
+
+    for ix in range(n_jobs):
+        print(cmd.format(replicates_per, args.donor_pop, os.path.join(args.odir, 'sim.{0:06d}.log'.format(counter)),
+                         os.path.join(args.odir, 'sim.{0:06d}.ms'.format(counter)),
+                         os.path.join(args.odir, 'sim.{0:06d}.out'.format(counter))))
+        os.system(cmd.format(replicates_per, args.donor_pop, os.path.join(args.odir, 'sim.{0:06d}.log'.format(counter)),
+                             os.path.join(args.odir, 'sim.{0:06d}.ms'.format(counter)),
+                             os.path.join(args.odir, 'sim.{0:06d}.out'.format(counter))))
+        counter += 1
+
+if __name__ == '__main__':
+    main()
+
