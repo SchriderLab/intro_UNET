@@ -92,7 +92,7 @@ def main():
 
     args = parse_args()
 
-    ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])[:10]
+    ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])
     log_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'log.gz' in u])
     out_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if '.out' in u])
 
