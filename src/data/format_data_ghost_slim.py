@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 from calc_stats_ms import *
 from mpi4py import MPI
 
+import copy
+
 def get_feature_vector(mutation_positions, genotypes, ref_geno, arch):
     n_samples = len(genotypes[0])
 
@@ -73,6 +75,7 @@ def parse_args():
     parser.add_argument("--window_size", default = "50000")
 
     parser.add_argument("--n_files", default = "1250")
+    parser.add_argument("--two_channel", action = "store_true")
 
     args = parser.parse_args()
 
@@ -120,6 +123,39 @@ def main():
                 X = x[4:-4,middle_indices]
                 Y = y[4:-4,middle_indices]
 
+                if args.format_mode == 'sort_NN':
+                    X, indices = sort_NN(X)
+
+                elif args.format_mode == 'sort_NN_max':
+                    X, indices = sort_NN(X, method='max')
+
+                elif args.format_mode == 'min_match_sorted':
+                    X, indices = sort_cdist(X, opt='min', sort_pop=True)
+
+                elif args.format_mode == 'max_match_sorted':
+                    X, indices = sort_cdist(X, opt='max', sort_pop=True)
+
+                elif args.format_mode == 'min_match':
+                    X, indices = sort_cdist(X, opt='min', sort_pop=False)
+
+                elif args.format_mode == 'max_match':
+                    X, indices = sort_cdist(X, opt='max', sort_pop=False)
+
+                Y = Y[indices]
+
+                if args.two_channel:
+                    _ = np.zeros((X.shape[0] // 2, X.shape[1], 2))
+                    _[:,:,0] = X[:X.shape[0] // 2, :]
+                    _[:,:,1] = X[X.shape[0] // 2:, :]
+
+                    X = copy.copy(_)
+
+                    _ = np.zeros((Y.shape[0] // 2, Y.shape[1], 2))
+                    _[:, :, 0] = Y[:Y.shape[0] // 2, :]
+                    _[:, :, 1] = Y[Y.shape[0] // 2:, :]
+
+                    Y = copy.copy(_)
+
                 comm.send([X, Y, p[k]], dest = 0)
 
     else:
@@ -147,10 +183,17 @@ def main():
             params.append(param)
 
             while len(X) >= batch_size:
+                x_data = np.array(X[-batch_size:], dtype=np.uint8)
+                y_data = np.array(Y[-batch_size:], dtype=np.uint8)
+
+                if len(x_data.shape) == 3:
+                    x_data = add_channel(x_data)
+                    y_data = add_channel(y_data)
+
                 ofile.create_dataset('{0}/x_0'.format(counter),
-                                     data=add_channel(np.array(X[-batch_size:], dtype=np.uint8)), compression='lzf')
+                                     data=x_data, compression='lzf')
                 ofile.create_dataset('{0}/y'.format(counter),
-                                     data=add_channel(np.array(Y[-batch_size:], dtype=np.uint8)), compression='lzf')
+                                     data=y_data, compression='lzf')
 
                 ofile.create_dataset('{0}/params'.format(counter), data=np.array(params[-batch_size:]),
                                      dtype=np.float32, compression='lzf')
