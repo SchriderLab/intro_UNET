@@ -7,7 +7,9 @@ from scipy.spatial.distance import cdist, pdist
 import json,pprint
 
 from scipy.optimize import linear_sum_assignment
+import random
 
+# finds the middle component of a list (if there are an even number of entries, then returns the first of the middle two)
 def findMiddle(input_list):
     middle = float(len(input_list))/2
     if middle % 2 != 0:
@@ -15,6 +17,8 @@ def findMiddle(input_list):
     else:
         return (input_list[int(middle)], input_list[int(middle-1)])[0]
 
+# something from the ArchIE repository
+# a supporting function, writes positions to a file in a tab separated format
 def write_snp_file(positions, ofile):
     ofile = open(ofile, 'w')
 
@@ -25,6 +29,7 @@ def write_snp_file(positions, ofile):
 
     ofile.close()
 
+# writes a binary matrix to a text file
 def write_binary_matrix(mat, ofile):
     ofile = open(ofile, 'w')
 
@@ -35,15 +40,20 @@ def write_binary_matrix(mat, ofile):
 
     ofile.close()
 
+# Gets all possible windows over a predictor image with a particular window size
 def get_windows(x, ipos, wsize = 500):
+    # positions of polymorphisms
     ipos = list(ipos)
 
     indices = range(x.shape[1])
+    # get the middle index
     middle_index = findMiddle(indices)
 
+    # get the indices for the x-axis of a predictor image of 128 SNPs
     indices = range(middle_index - 64, middle_index + 64)
     sets = []
 
+    # for these indices, get as many unique windows (of the specified size) as possible that include these positions
     for ix in indices:
         p = set([u for u in ipos if (u >= ipos[ix] - wsize) and (u <= ipos[ix])])
 
@@ -55,6 +65,7 @@ def get_windows(x, ipos, wsize = 500):
         if p not in sets:
             sets.append(p)
 
+    # sort
     sets = [sorted(list(u)) for u in sets]
     sets = sorted(sets, key = lambda u: u[0])
 
@@ -65,6 +76,8 @@ def get_windows(x, ipos, wsize = 500):
 
     return ret, indices
 
+# same idea as above function, but here the window size is fixed in terms of SNPs (128 SNPs) and
+# not base pairs
 def get_windows_snps(x, ipos):
     ipos = list(ipos)
 
@@ -74,6 +87,8 @@ def get_windows_snps(x, ipos):
     indices = range(middle_index - 64, middle_index + 64)
     sets = []
 
+    # kind of janky (but whatever)
+    # for a predictor image with width N, there 2N - 1 unique windows of size N that include one of those SNPs
     for ix in indices[:63]:
         sets.append(ipos[ix + 1 - 128:ix + 1])
 
@@ -93,6 +108,9 @@ def get_windows_snps(x, ipos):
 
     return ret, indices
 
+# reads params from an SLiM output file
+# this one is for the two-pop introgressive hybridization problem problem where there are 3 parameters per replicate:
+# Migration time, migration probability (A -> B), and migration probability (B -> A)
 def get_params(out):
     ret = []
 
@@ -115,6 +133,9 @@ def get_params(out):
 
     return np.array(ret)
 
+# for the ArchIE problem
+# read parameters from a SLiM output file (the stdout from a simulation)
+# two parameters to be read: migration time, and migration probability (from the ghost population)
 def get_params_ghost(out):
     ret = []
 
@@ -137,10 +158,12 @@ def get_params_ghost(out):
 
     return np.array(ret)
 
-
+# add a channel axis to a 2D matrix
 def add_channel(matrix):
     return matrix.reshape(matrix.shape + (1, ))
 
+# compare to different predictor and target images
+# was used to visually compare different sortings
 def plot_sorting(x, y, xo, yo):
     fig, axes = plt.subplots(nrows = 2, ncols = 2)
 
@@ -164,15 +187,24 @@ def min_diff_indices(amat, method = 'min'):
 
     return v[1][smallest]
 
-def sort_NN(X):
+def sort_NN(X, method = 'min'):
     X1 = X[: X.shape[0] // 2]
     X2 = X[X.shape[0] // 2:]
 
     indices = []
-    indices.extend(min_diff_indices(X1))
-    indices.extend([u + X.shape[0] // 2 for u in min_diff_indices(X2)])
+    indices.extend(min_diff_indices(X1, method = method))
+    indices.extend([u + X.shape[0] // 2 for u in min_diff_indices(X2, method = method)])
 
     return X[indices], indices
+
+def shuffle_indices(X):
+    i1 = list(range(X.shape[0] // 2))
+    random.shuffle(i1)
+
+    i2 = list(range(X.shape[0] // 2, X.shape[0]))
+    random.shuffle(i2)
+
+    return i1 + i2
 
 def sort_cdist(X, metric='cityblock', opt='min', sort_pop=True):
     X1 = X[: X.shape[0] // 2]
