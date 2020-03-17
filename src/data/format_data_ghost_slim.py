@@ -66,16 +66,15 @@ def parse_args():
 
     parser.add_argument("--format_mode", default = "sort_NN")
 
-    parser.add_argument("--n_individuals", default = "64")
+    parser.add_argument("--n_individuals", default = "200")
     parser.add_argument("--n_per_file", default = "8")
 
     parser.add_argument("--batch_size", default="8")
 
     parser.add_argument("--ofile", default = "archie_data.hdf5")
-    parser.add_argument("--window_size", default = "50000")
 
-    parser.add_argument("--n_files", default = "1250")
     parser.add_argument("--two_channel", action = "store_true")
+    parser.add_argument("--zero_check", action = "store_true")
 
     args = parser.parse_args()
 
@@ -93,9 +92,7 @@ def main():
 
     args = parse_args()
 
-    window_size = int(args.window_size)
-
-    ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])
+    ms_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'ms.gz' in u])[:10]
     log_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if 'log.gz' in u])
     out_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if '.out' in u])
 
@@ -118,7 +115,7 @@ def main():
                 ipos = P[k]
                 y = itarget[k]
 
-                windows, middle_indices = get_windows(x, ipos, window_size)
+                windows, middle_indices = get_windows(x, ipos, 50000)
 
                 X = x[4:-4,middle_indices]
                 Y = y[4:-4,middle_indices]
@@ -151,8 +148,10 @@ def main():
                     X = copy.copy(_)
 
                     _ = np.zeros((Y.shape[0] // 2, Y.shape[1], 2))
-                    _[:, :, 0] = Y[:Y.shape[0] // 2, :]
+                    _[:, :, 0] = Y[Y.shape[0] // 2:, :]
                     _[:, :, 1] = Y[Y.shape[0] // 2:, :]
+
+                    _[:,:, 0] = 1 - _[:,:,0]
 
                     Y = copy.copy(_)
 
@@ -178,9 +177,15 @@ def main():
             if n_recieved % 10 == 0:
                 logging.debug('0: recieved {0} simulations'.format(n_recieved))
 
-            X.append(x)
-            Y.append(y)
-            params.append(param)
+            if not args.zero_check:
+                X.append(x)
+                Y.append(y)
+                params.append(param)
+            else:
+                if np.sum(y) > 0:
+                    X.append(x)
+                    Y.append(y)
+                    params.append(param)
 
             while len(X) >= batch_size:
                 x_data = np.array(X[-batch_size:], dtype=np.uint8)
