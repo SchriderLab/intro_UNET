@@ -147,7 +147,7 @@ def main():
 
                     X = copy.copy(_)
 
-                    Y = Y[Y.shape[0] // 2:, :]
+                    Y = add_channel(Y[Y.shape[0] // 2:, :])
 
                 comm.send([X, Y, p[k]], dest = 0)
 
