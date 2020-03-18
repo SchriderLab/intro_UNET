@@ -147,13 +147,7 @@ def main():
 
                     X = copy.copy(_)
 
-                    _ = np.zeros((Y.shape[0] // 2, Y.shape[1], 2))
-                    _[:, :, 0] = Y[Y.shape[0] // 2:, :]
-                    _[:, :, 1] = Y[Y.shape[0] // 2:, :]
-
-                    _[:,:, 0] = 1 - _[:,:,0]
-
-                    Y = copy.copy(_)
+                    Y = Y[Y.shape[0] // 2:, :]
 
                 comm.send([X, Y, p[k]], dest = 0)
 
