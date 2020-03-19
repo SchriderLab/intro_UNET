@@ -21,6 +21,9 @@ def parse_args():
     parser.add_argument("--batch_size", default = "8")
 
     parser.add_argument("--n_individuals", default = "48")
+    parser.add_argument("--n_sites", default = "128")
+
+    parser.add_argument("--down_size", default = "0")
 
     args = parser.parse_args()
 
@@ -57,7 +60,7 @@ def main():
         log = log_files[ix]
         out = out_files[ix]
 
-        x, ipos, itarget, iintrog_reg = load_data(ms, log, 128, int(args.n_individuals))
+        x, ipos, itarget, iintrog_reg = load_data(ms, log, int(args.n_sites), int(args.n_individuals))
         p = get_params(out)
 
         params.extend(p)
@@ -111,8 +114,8 @@ def main():
         while len(X) >= batch_size:
             logging.debug('root: making batch {0}'.format(counter))
             
-            ofile.create_dataset('{0}/x_0'.format(counter), data = add_channel(np.array(X[-batch_size:], dtype = np.uint8)), compression = 'lzf')
-            ofile.create_dataset('{0}/y'.format(counter), data = add_channel(np.array(y[-batch_size:], dtype = np.uint8)), compression = 'lzf')
+            ofile.create_dataset('{0}/x_0'.format(counter), data = add_channel(np.array(X[-batch_size:], dtype = np.uint8)[:,int(args.down_size):,:]), compression = 'lzf')
+            ofile.create_dataset('{0}/y'.format(counter), data = add_channel(np.array(y[-batch_size:], dtype = np.uint8)[:,int(args.down_size):,:]), compression = 'lzf')
             ofile.create_dataset('{0}/params'.format(counter), data = np.array(params[-batch_size:]), dtype = np.float32, compression = 'lzf')
 
             del X[-batch_size:]
