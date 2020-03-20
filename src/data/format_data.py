@@ -25,6 +25,8 @@ def parse_args():
 
     parser.add_argument("--down_size", default = "0")
 
+    parser.add_argument("--no_y", action = "store_true")
+
     args = parser.parse_args()
 
     if args.verbose:
@@ -115,7 +117,8 @@ def main():
             logging.debug('root: making batch {0}'.format(counter))
             
             ofile.create_dataset('{0}/x_0'.format(counter), data = add_channel(np.array(X[-batch_size:], dtype = np.uint8)[:,int(args.down_size):,:]), compression = 'lzf')
-            ofile.create_dataset('{0}/y'.format(counter), data = add_channel(np.array(y[-batch_size:], dtype = np.uint8)[:,int(args.down_size):,:]), compression = 'lzf')
+            if not args.no_y:
+                ofile.create_dataset('{0}/y'.format(counter), data = add_channel(np.array(y[-batch_size:], dtype = np.uint8)[:,int(args.down_size):,:]), compression = 'lzf')
             ofile.create_dataset('{0}/params'.format(counter), data = np.array(params[-batch_size:]), dtype = np.float32, compression = 'lzf')
 
             del X[-batch_size:]
