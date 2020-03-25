@@ -117,7 +117,7 @@ def main():
 
                 X = x[4:-4,:128]
                 Y = y[4:-4,:128]
-                
+
                 if args.format_mode == 'sort_NN':
                     X, indices = sort_NN(X)
 
@@ -151,7 +151,7 @@ def main():
                 if Y.shape[1] == 128:
                     comm.send([X, Y, p[k]], dest = 0)
                 else:
-                    comm.send([np.zeros((192, 128), dtype = np.uint8), np.zeros((192, 128), dtype = np.uint8), p[k]])
+                    comm.send([np.zeros((192, 128), dtype = np.uint8), np.zeros((192, 128), dtype = np.uint8), p[k]], dest = 0)
 
     else:
         ofile = h5py.File(args.ofile, 'w')
