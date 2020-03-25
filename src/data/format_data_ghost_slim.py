@@ -115,10 +115,8 @@ def main():
                 ipos = P[k]
                 y = itarget[k]
 
-                windows, middle_indices = get_windows(x, ipos, 50000)
-
-                X = x[4:-4,middle_indices]
-                Y = y[4:-4,middle_indices]
+                X = x[4:-4,:128]
+                Y = y[4:-4,:128]
 
                 if args.format_mode == 'sort_NN':
                     X, indices = sort_NN(X)
