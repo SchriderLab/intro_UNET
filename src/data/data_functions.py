@@ -3,11 +3,40 @@ from random import shuffle
 import gzip
 from matplotlib import pyplot as plt
 from sklearn.neighbors import NearestNeighbors
-from scipy.spatial.distance import cdist, pdist
+from scipy.spatial.distance import cdist, pdist, squareform
 import json,pprint
 
 from scipy.optimize import linear_sum_assignment
 import random
+
+from seriate import seriate
+
+def sort_XY(X, Y, config):
+    x1 = X[:X.shape[0] // 2, :]
+    x2 = X[X.shape[0] // 2:, :]
+
+    y1 = Y[:X.shape[0] // 2, :]
+    y2 = Y[X.shape[0] // 2:, :]
+
+    D_x1 = pdist(x1, metric = config.get('population_sorting', 'distance_metric_A'))
+    D_x2 = pdist(x2, metric = config.get('population_sorting', 'distance_metric_B'))
+
+    if config.getboolean('population_sorting', 'inverse_A'):
+        D_x1 = (D_x1 + 0.000001)**-1
+
+    if config.getboolean('population_sorting', 'inverse_B'):
+        D_x2 = (D_x2 + 0.000001)**-1
+
+    sorting_method_A = config.get('population_sorting', 'sorting_method_A')
+    sorting_method_B = config.get('population_sorting', 'sorting_method_B')
+
+    if sorting_method_A == 'seriate':
+        i1 = seriate(D_x1)
+
+    if sorting_method_B == 'seriate':
+        i2 = seriate(D_x2)
+
+    return np.vstack([x1[i1], x2[i2]]), np.vstack([y1[i1], y2[i2]])
 
 # finds the middle component of a list (if there are an even number of entries, then returns the first of the middle two)
 def findMiddle(input_list):
@@ -206,7 +235,7 @@ def shuffle_indices(X):
 
     return i1 + i2
 
-def sort_cdist(X, metric='cityblock', opt='min', sort_pop=True):
+def sort_cdist(X, metric='cityblock', opt='min', sort_pop=True, reverse_pops = False):
     X1 = X[: X.shape[0] // 2]
     X2 = X[X.shape[0] // 2:]
 
@@ -216,6 +245,7 @@ def sort_cdist(X, metric='cityblock', opt='min', sort_pop=True):
         D = (D + 0.0001) ** -1
 
     i, j = linear_sum_assignment(D)
+
     coms = dict(zip(i, j))
 
     if sort_pop:
@@ -289,6 +319,7 @@ def load_data(msfile, introgressfile, max_len, nindv):
             if len(i) > max_len:
                 i = i[:max_len]
             else:
+                raise Exception("Sorry too short")
                 print('aah.  too short at ', gdx)
                 break
 
