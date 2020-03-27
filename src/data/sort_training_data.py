@@ -7,13 +7,18 @@ from data_functions import *
 import h5py
 import copy
 
+import configparser
+from mpi4py import MPI
+
 def parse_args():
     # Argument Parser
     parser = argparse.ArgumentParser()
     parser.add_argument("--verbose", action="store_true", help="display messages")
     parser.add_argument("--ifile", default = "None")
     parser.add_argument("--ofile", default = "None")
-    parser.add_argument("--format_mode", default = "sort_NN")
+    parser.add_argument("--format_config", default = "None")
+
+    parser.add_argument("--two_channel", action = "store_true")
 
     args = parser.parse_args()
 
@@ -28,47 +33,62 @@ def parse_args():
 def main():
     args = parse_args()
 
+    # configure MPI
+    comm = MPI.COMM_WORLD
+
     ifile = h5py.File(args.ifile, 'r')
-    ofile = h5py.File(args.ofile, 'w')
 
     keys = list(ifile.keys())
 
-    for key in keys:
-        X_batch = np.array(ifile[key + '/x_0'])
-        y_batch = np.array(ifile[key + '/y'])
+    config = configparser.ConfigParser()
+    config.read(args.format_config)
 
-        for k in range(len(X_batch)):
-            X = copy.copy(X_batch[k,:,:,0])
-            y = copy.copy(y_batch[k,:,:,0])
+    if comm.rank != 0:
+        for ix in range(comm.rank - 1, len(keys), comm.size - 1):
+            key = keys[ix]
 
-            if args.format_mode == 'sort_NN':
-                X, indices = sort_NN(X)
+            logging.debug('{0}: working on key {1} of {2}'.format(comm.rank, ix + 1, len(keys)))
 
-            elif args.format_mode == 'sort_NN_max':
-                X, indices = sort_NN(X, method = 'max')
+            X_batch = np.array(ifile[key + '/x_0'])
+            y_batch = np.array(ifile[key + '/y'])
 
-            elif args.format_mode == 'min_match_sorted':
-                X, indices = sort_cdist(X, opt='min', sort_pop=True)
+            X_new_batch = []
+            y_new_batch = []
 
-            elif args.format_mode == 'max_match_sorted':
-                X, indices = sort_cdist(X, opt='max', sort_pop=True)
+            for k in range(len(X_batch)):
+                X = copy.copy(X_batch[k,:,:,0])
+                y = copy.copy(y_batch[k,:,:,0])
 
-            elif args.format_mode == 'min_match':
-                X, indices = sort_cdist(X, opt='min', sort_pop=False)
+                X, y = sort_XY(X, y, config)
 
-            elif args.format_mode == 'max_match':
-                X, indices = sort_cdist(X, opt='max', sort_pop=False)
+                if args.two_channel:
+                    _ = np.zeros((X.shape[0] // 2, X.shape[1], 2))
+                    _[:, :, 0] = X[:X.shape[0] // 2, :]
+                    _[:, :, 1] = X[X.shape[0] // 2:, :]
 
-            y = y[indices]
+                    X = copy.copy(_)
 
-            X_batch[k,:,:,0] = X
-            y_batch[k,:,:,0] = y
+                    y = add_channel(y[y.shape[0] // 2:, :])
 
-        ofile.create_dataset(key + '/x_0', data = X_batch, compression = 'lzf')
-        ofile.create_dataset(key + '/y', data = y_batch, compression = 'lzf')
+                X_new_batch.append(X)
+                y_new_batch.append(y)
 
-    ifile.close()
-    ofile.close()
+            comm.send([np.array(X_new_batch, dtype = np.uint8), np.array(y_new_batch, dtype = np.uint8)], dest=0)
+
+    else:
+        ofile = h5py.File(args.ofile, 'w')
+
+        n_received = 0
+
+        while n_received < len(keys):
+            X_batch, y_batch = comm.recv(source = MPI.ANY_SOURCE)
+
+            ofile.create_dataset(str(n_received) + '/x_0', data = X_batch, compression = 'lzf')
+            ofile.create_dataset(str(n_received) + '/y', data = y_batch, compression = 'lzf')
+
+            n_received += 1
+
+        ofile.close()
 
 if __name__ == '__main__':
     main()
