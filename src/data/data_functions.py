@@ -2,14 +2,69 @@ import numpy as np
 from random import shuffle
 import gzip
 from matplotlib import pyplot as plt
-from sklearn.neighbors import NearestNeighbors
-from scipy.spatial.distance import cdist, pdist, squareform
+from sklearn.neighbors import NearestNeighbors, DistanceMetric
+from scipy.spatial.distance import cdist, pdist, squareform, dice
 import json,pprint
 
 from scipy.optimize import linear_sum_assignment
 import random
 
+from sklearn import datasets
+from fastcluster import linkage
+
+import sys
+
 from seriate import seriate
+
+
+def seriation(Z, N, cur_index):
+    '''
+        input:
+            - Z is a hierarchical tree (dendrogram)
+            - N is the number of points given to the clustering process
+            - cur_index is the position in the tree for the recursive traversal
+        output:
+            - order implied by the hierarchical tree Z
+
+        seriation computes the order implied by a hierarchical tree (dendrogram)
+    '''
+    if cur_index < N:
+        return [cur_index]
+    else:
+        left = int(Z[cur_index - N, 0])
+        right = int(Z[cur_index - N, 1])
+        return (seriation(Z, N, left) + seriation(Z, N, right))
+
+
+def compute_serial_matrix(dist_mat, method="ward"):
+    '''
+        input:
+            - dist_mat is a distance matrix
+            - method = ["ward","single","average","complete"]
+        output:
+            - seriated_dist is the input dist_mat,
+              but with re-ordered rows and columns
+              according to the seriation, i.e. the
+              order implied by the hierarchical tree
+            - res_order is the order implied by
+              the hierarhical tree
+            - res_linkage is the hierarhical tree (dendrogram)
+
+        compute_serial_matrix transforms a distance matrix into
+        a sorted distance matrix according to the order implied
+        by the hierarchical tree (dendrogram)
+    '''
+    N = len(dist_mat)
+    flat_dist_mat = squareform(dist_mat)
+    res_linkage = linkage(flat_dist_mat, method=method, preserve_input=True)
+    res_order = seriation(res_linkage, N, N + N - 2)
+    seriated_dist = np.zeros((N, N))
+    a, b = np.triu_indices(N, k=1)
+    seriated_dist[a, b] = dist_mat[[res_order[i] for i in a], [res_order[j] for j in b]]
+    seriated_dist[b, a] = seriated_dist[a, b]
+
+    return seriated_dist, res_order, res_linkage
+
 
 def sort_XY(X, Y, config):
     x1 = X[:X.shape[0] // 2, :]
@@ -21,6 +76,9 @@ def sort_XY(X, Y, config):
     D_x1 = pdist(x1, metric = config.get('population_sorting', 'distance_metric_A'))
     D_x2 = pdist(x2, metric = config.get('population_sorting', 'distance_metric_B'))
 
+    D_x1[np.where(np.isnan(D_x1))] = 0.
+    D_x2[np.where(np.isnan(D_x2))] = 0.
+
     if config.getboolean('population_sorting', 'inverse_A'):
         D_x1 = (D_x1 + 0.000001)**-1
 
@@ -30,13 +88,82 @@ def sort_XY(X, Y, config):
     sorting_method_A = config.get('population_sorting', 'sorting_method_A')
     sorting_method_B = config.get('population_sorting', 'sorting_method_B')
 
+    # sort population A
+    ####################################
+
     if sorting_method_A == 'seriate':
         i1 = seriate(D_x1)
+
+    elif sorting_method_A == 'sort_NN':
+        if config.getboolean('population_sorting', 'inverse_A'):
+            i1 = min_diff_indices(x1, method = 'max', metric = config.get('population_sorting', 'distance_metric_A'))
+        else:
+            i1 = min_diff_indices(x1, method='min', metric=config.get('population_sorting', 'distance_metric_A'))
+
+    elif 'dendrogram_sort' in sorting_method_A:
+        ordered_distance_mat, i1, _ = compute_serial_matrix(D_x1, sorting_method_A.split(' ').replace('(', '').replace(')', ''))
+
+    elif sorting_method_A == 'None':
+        i1 = list(range(x1.shape[0]))
+
+    #####################################
+    #####################################
+    # sort population B
 
     if sorting_method_B == 'seriate':
         i2 = seriate(D_x2)
 
-    return np.vstack([x1[i1], x2[i2]]), np.vstack([y1[i1], y2[i2]])
+    elif sorting_method_B == 'sort_NN':
+        if config.getboolean('population_sorting', 'inverse_A'):
+            i2 = min_diff_indices(x1, method = 'max', metric = config.get('population_sorting', 'distance_metric_B'))
+        else:
+            i2 = min_diff_indices(x1, method='min', metric=config.get('population_sorting', 'distance_metric_B'))
+
+    elif 'dendrogram_sort' in sorting_method_B:
+        ordered_distance_mat, i2, _ = compute_serial_matrix(D_x2, sorting_method_A.split(' ').replace('(', '').replace(')', ''))
+
+    elif sorting_method_B == 'None':
+        i2 = list(range(x2.shape[0]))
+
+    # do matching if necessary
+    #######################################
+
+    x1 = x1[i1]
+    x2 = x2[i2]
+
+    y1 = y1[i1]
+    y2 = y2[i2]
+
+    if config.getboolean('matching', 'perform_matching'):
+        if config.get('matching', 'matching_direction') == 'AB':
+            D = cdist(x2, x1, metric = config.get('matching', 'matching_metric'))
+
+            if config.getboolean('matching', 'inverse'):
+                D = (D + 0.000001)**-1
+
+            i, j = linear_sum_assignment(D)
+
+            coms = dict(zip(i, j))
+
+            i1 = [coms[u] for u in sorted(coms.keys())]
+            x1 = x1[i1]
+            y1 = y1[i1]
+
+        elif config.get('matching', 'matching_direction') == 'BA':
+            D = cdist(x1, x2, metric=config.get('matching', 'matching_metric'))
+
+            if config.getboolean('matching', 'inverse'):
+                D = (D + 0.000001) ** -1
+
+            i, j = linear_sum_assignment(D)
+
+            coms = dict(zip(i, j))
+
+            i1 = [coms[u] for u in sorted(coms.keys())]
+            x2 = x2[i2]
+            y2 = y2[i2]
+
+    return np.vstack([x1, x2]), np.vstack([y1, y2])
 
 # finds the middle component of a list (if there are an even number of entries, then returns the first of the middle two)
 def findMiddle(input_list):
@@ -205,8 +332,31 @@ def plot_sorting(x, y, xo, yo):
     plt.show()
     plt.close()
 
-def min_diff_indices(amat, method = 'min'):
-    mb = NearestNeighbors(len(amat), metric = 'manhattan').fit(amat)
+def cosine_distance(x, y):
+    _ = np.dot(x, y) / (np.linalg.norm(x) * np.linalg.norm(y))
+
+    if _ == np.nan:
+        return 0.
+    else:
+        return _
+
+def dice_distance(x, y):
+    _ = dice(x, y)
+
+    if _ == np.nan:
+        return 0.
+    else:
+        return _
+
+def min_diff_indices(amat, method = 'min', metric = 'cityblock'):
+    if metric == 'cityblock':
+        metric = 'manhattan'
+    elif metric == 'cosine':
+        metric = DistanceMetric.get_metric('pyfunc', func=cosine_distance)
+    elif metric == 'dice':
+        metric = DistanceMetric.get_metric('pyfunc', func=dice_distance)
+
+    mb = NearestNeighbors(len(amat), metric = metric).fit(amat)
     v = mb.kneighbors(amat)
 
     if method == 'min':
