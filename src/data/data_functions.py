@@ -94,14 +94,14 @@ def sort_XY(X, Y, config):
     if sorting_method_A == 'seriate':
         i1 = seriate(D_x1)
 
-    elif sorting_method_A == 'sort_NN':
+    elif sorting_method_A == 'NN_sort':
         if config.getboolean('population_sorting', 'inverse_A'):
             i1 = min_diff_indices(x1, method = 'max', metric = config.get('population_sorting', 'distance_metric_A'))
         else:
             i1 = min_diff_indices(x1, method='min', metric=config.get('population_sorting', 'distance_metric_A'))
 
     elif 'dendrogram_sort' in sorting_method_A:
-        ordered_distance_mat, i1, _ = compute_serial_matrix(D_x1, sorting_method_A.split(' ')[-1].replace('(', '').replace(')', ''))
+        ordered_distance_mat, i1, _ = compute_serial_matrix(squareform(D_x1), sorting_method_A.split(' ')[-1].replace('(', '').replace(')', ''))
 
     elif sorting_method_A == 'None':
         i1 = list(range(x1.shape[0]))
@@ -113,14 +113,15 @@ def sort_XY(X, Y, config):
     if sorting_method_B == 'seriate':
         i2 = seriate(D_x2)
 
-    elif sorting_method_B == 'sort_NN':
+    elif sorting_method_B == 'NN_sort':
         if config.getboolean('population_sorting', 'inverse_A'):
             i2 = min_diff_indices(x1, method = 'max', metric = config.get('population_sorting', 'distance_metric_B'))
         else:
             i2 = min_diff_indices(x1, method='min', metric=config.get('population_sorting', 'distance_metric_B'))
 
     elif 'dendrogram_sort' in sorting_method_B:
-        ordered_distance_mat, i2, _ = compute_serial_matrix(D_x2, sorting_method_A.split(' ')[-1].replace('(', '').replace(')', ''))
+        
+        ordered_distance_mat, i2, _ = compute_serial_matrix(squareform(D_x2), sorting_method_B.split(' ')[-1].replace('(', '').replace(')', ''))
 
     elif sorting_method_B == 'None':
         i2 = list(range(x2.shape[0]))
@@ -352,9 +353,9 @@ def min_diff_indices(amat, method = 'min', metric = 'cityblock'):
     if metric == 'cityblock':
         metric = 'manhattan'
     elif metric == 'cosine':
-        metric = DistanceMetric.get_metric('pyfunc', func=cosine_distance)
+        metric = cosine_distance
     elif metric == 'dice':
-        metric = DistanceMetric.get_metric('pyfunc', func=dice_distance)
+        metric = dice_distance
 
     mb = NearestNeighbors(len(amat), metric = metric).fit(amat)
     v = mb.kneighbors(amat)
