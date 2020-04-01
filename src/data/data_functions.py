@@ -138,6 +138,7 @@ def sort_XY(X, Y, config):
     if config.getboolean('matching', 'perform_matching'):
         if config.get('matching', 'matching_direction') == 'AB':
             D = cdist(x2, x1, metric = config.get('matching', 'matching_metric'))
+            D[np.where(np.isnan(D))] = 0.
 
             if config.getboolean('matching', 'inverse'):
                 D = (D + 0.000001)**-1
@@ -152,6 +153,7 @@ def sort_XY(X, Y, config):
 
         elif config.get('matching', 'matching_direction') == 'BA':
             D = cdist(x1, x2, metric=config.get('matching', 'matching_metric'))
+            D[np.where(np.isnan(D))] = 0.
 
             if config.getboolean('matching', 'inverse'):
                 D = (D + 0.000001) ** -1
