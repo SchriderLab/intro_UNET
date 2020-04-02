@@ -60,11 +60,13 @@ def main():
 
         while len(X) > batch_size:
             if not args.no_channel:
-                x_data = add_channel(np.array(X[-batch_size:], dtype=np.uint8)[:, int(args.down_size):, :])
-                y_data = add_channel(np.array(y[-batch_size:], dtype=np.uint8)[:, int(args.down_size):, :])
+                x_data = add_channel(np.array(X[-batch_size:], dtype=np.uint8))
+                y_data = add_channel(np.array(y[-batch_size:], dtype=np.uint8))
             else:
-                x_data = np.array(X[-batch_size:], dtype=np.uint8)[:, int(args.down_size):, :]
-                y_data = np.array(y[-batch_size:], dtype=np.uint8)[:, int(args.down_size):, :]
+                x_data = np.array(X[-batch_size:], dtype=np.uint8)
+                y_data = np.array(y[-batch_size:], dtype=np.uint8)
+
+            print(x_data.shape, y_data.shape)
 
             ofile.create_dataset('{0}/x_0'.format(counter), data=x_data, compression='lzf')
 

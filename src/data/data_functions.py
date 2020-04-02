@@ -540,6 +540,43 @@ def load_data_ghost(msfile, introgressfile, max_len, nindv):
         target.append(np.array(mask_mat, dtype='int8'))
     return f, pos, target, igD
 
+def split(word):
+    return [char for char in word]
+
+def load_data_dros(msFile, ancFile, n_sites = 64):
+    msFile = open(msFile, 'r')
+    ancFile = open(ancFile, 'r')
+
+    ms_lines = msFile.readlines()
+
+    idx_list = [idx for idx, value in enumerate(ms_lines) if '//' in value] + [len(ms_lines)]
+
+    ms_chunks = [ms_lines[idx_list[k]:idx_list[k+1]] for k in range(len(idx_list) - 1)]
+    ms_chunks[-1] += ['\n']
+
+    anc_lines = ancFile.readlines()
+
+    X = []
+    Y = []
+
+    for chunk in ms_chunks:
+        pos = np.array([u for u in chunk[2].split(' ')[1:-1] if u != ''], dtype = np.float32)
+
+        x = np.array([list(map(int, split(u.replace('\n', '')))) for u in chunk[3:-1]], dtype = np.uint8)
+        y = np.array([list(map(int, split(u.replace('\n', '')))) for u in anc_lines[:len(pos)]], dtype = np.uint8)
+
+        y = y.T
+
+        del anc_lines[:len(pos)]
+
+        x = x[2:,:n_sites]
+        y = y[2:,:n_sites]
+
+        X.append(x)
+        Y.append(y)
+
+    return X, Y
+
 def max_len_only(xfile):
     g = list(get_gz_file(xfile))
     k = [idx for idx,i in enumerate(g) if len(i) > 0 and str(i[0]).startswith('//')]
