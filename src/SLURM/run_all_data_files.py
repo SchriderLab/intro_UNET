@@ -33,7 +33,7 @@ def main():
 
     for ifile in ifiles:
         cmd_ = cmd.format(os.path.join(args.idir, ifile), args.odir, ifile.split('.')[0], args.indices)
-        print(cmd_)
+        os.system(cmd_)
 
 if __name__ == '__main__':
     main()
