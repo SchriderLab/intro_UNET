@@ -66,7 +66,7 @@ def compute_serial_matrix(dist_mat, method="ward"):
     return seriated_dist, res_order, res_linkage
 
 
-def sort_XY(X, Y, config):
+def sort_XY(X, Y, config, return_indices = False):
     x1 = X[:X.shape[0] // 2, :]
     x2 = X[X.shape[0] // 2:, :]
 
@@ -147,9 +147,12 @@ def sort_XY(X, Y, config):
 
             coms = dict(zip(i, j))
 
-            i1 = [coms[u] for u in sorted(coms.keys())]
-            x1 = x1[i1]
-            y1 = y1[i1]
+            i1_ = [coms[u] for u in sorted(coms.keys())]
+            x1 = x1[i1_]
+            y1 = y1[i1_]
+
+            # sort i1 in case we need to return it
+            i1 = [i1[u] for u in i1_]
 
         elif config.get('matching', 'matching_direction') == 'BA':
             D = cdist(x1, x2, metric=config.get('matching', 'matching_metric'))
@@ -162,11 +165,16 @@ def sort_XY(X, Y, config):
 
             coms = dict(zip(i, j))
 
-            i1 = [coms[u] for u in sorted(coms.keys())]
-            x2 = x2[i2]
-            y2 = y2[i2]
+            i2_ = [coms[u] for u in sorted(coms.keys())]
+            x2 = x2[i2_]
+            y2 = y2[i2_]
 
-    return np.vstack([x1, x2]), np.vstack([y1, y2])
+            i2 = [i2[u] for u in i2_]
+
+    if return_indices:
+        return np.vstack([x1, x2]), np.vstack([y1, y2]), i1, i2
+    else:
+        return np.vstack([x1, x2]), np.vstack([y1, y2])
 
 # finds the middle component of a list (if there are an even number of entries, then returns the first of the middle two)
 def findMiddle(input_list):
