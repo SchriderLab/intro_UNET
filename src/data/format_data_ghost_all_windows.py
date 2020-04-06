@@ -64,7 +64,7 @@ def parse_args():
 
     parser.add_argument("--format_mode", default = "sort_NN")
 
-    parser.add_argument("--n_individuals", default = "64")
+    parser.add_argument("--n_individuals", default = "200")
     parser.add_argument("--n_per_file", default = "8")
 
     parser.add_argument("--batch_size", default="8")
@@ -166,8 +166,6 @@ def main():
 
             if n_recieved % 10 == 0:
                 logging.debug('0: recieved {0} simulations'.format(n_recieved))
-
-
 
             X.append(x)
             Y.append(y)
