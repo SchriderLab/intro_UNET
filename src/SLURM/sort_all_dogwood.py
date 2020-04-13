@@ -29,17 +29,20 @@ def parse_args():
 def main():
     args = parse_args()
 
-    cmd = 'sbatch -p {2} -n 256 -t 2-00:00:00 --wrap "mpirun -oversubscribe python3 src/data/sort_training_data.py --ifile /proj/dschridelab/ddray/archie_data/sampled_data/10e5.hdf5 --ofile {0} --verbose --format_config {1} --two_channel"'
+    cmd = 'sbatch -p {2} -n 128 -t 2-00:00:00 --wrap "mpirun -oversubscribe python3 src/data/sort_training_data.py --ifile /proj/dschridelab/ddray/archie_data/sampled_data/10e5.hdf5 --ofile {0} --verbose --format_config {1} --two_channel"'
 
     # expect 60 files, split over two queues
     ifiles = sorted(os.listdir(args.idir))
 
     for ifile in ifiles[:30]:
         cmd_ = cmd.format(os.path.join(args.odir, '{0}.hdf5'.format(ifile)), os.path.join(args.idir, ifile), 'skylake')
+        print(cmd_)
         os.system(cmd_)
 
     for ifile in ifiles[30:]:
         cmd_ = cmd.format(os.path.join(args.odir, '{0}.hdf5'.format(ifile)), os.path.join(args.idir, ifile), '528_queue')
+        print(cmd_)
+
         os.system(cmd_)
 
 if __name__ == '__main__':
