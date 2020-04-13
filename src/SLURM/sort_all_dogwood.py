@@ -35,15 +35,18 @@ def main():
     ifiles = sorted(os.listdir(args.idir))
 
     for ifile in ifiles[:30]:
-        cmd_ = cmd.format(os.path.join(args.odir, '{0}.hdf5'.format(ifile)), os.path.join(args.idir, ifile), 'skylake')
+        cmd_ = cmd.format(os.path.join(args.odir, '{0}.hdf5'.format(ifile)), os.path.join(args.idir, ifile), '528_queue')
         print(cmd_)
         os.system(cmd_)
 
+    """
     for ifile in ifiles[30:]:
         cmd_ = cmd.format(os.path.join(args.odir, '{0}.hdf5'.format(ifile)), os.path.join(args.idir, ifile), '528_queue')
         print(cmd_)
 
         os.system(cmd_)
+    
+    """
 
 if __name__ == '__main__':
     main()
