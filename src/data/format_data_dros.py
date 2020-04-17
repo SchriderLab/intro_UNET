@@ -24,6 +24,9 @@ def parse_args():
     parser.add_argument("--no_y", action="store_true")
     parser.add_argument("--no_channel", action="store_true")
 
+    parser.add_argument("--up_sample", action = "store_true")
+    parser.add_argument("--pop_size", default = "32")
+
     args = parser.parse_args()
 
     if args.verbose:
@@ -53,7 +56,7 @@ def main():
         ms_file = os.path.join(idir, '{0}.msOut'.format(args.direction))
         anc_file = os.path.join(idir, 'out.anc')
 
-        x, y = load_data_dros(ms_file, anc_file)
+        x, y = load_data_dros(ms_file, anc_file, up_sample = args.up_sample, up_sample_pop_size = int(args.pop_size))
 
         X.extend(x)
         Y.extend(y)

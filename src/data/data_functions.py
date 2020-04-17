@@ -551,7 +551,16 @@ def load_data_ghost(msfile, introgressfile, max_len, nindv):
 def split(word):
     return [char for char in word]
 
-def load_data_dros(msFile, ancFile, n_sites = 64):
+def up_sample_populations(pop1_x, pop2_x, pop1_y, pop2_y, up_sample_pop_size = 32):
+    pop1_indices = list(range(pop1_x.shape[0])) + list(np.random.choice(range(pop1_x.shape[0]), size = up_sample_pop_size - pop1_x.shape[0], replace = False))
+    random.shuffle(pop1_indices)
+
+    pop2_indices = list(range(pop2_x.shape[0])) + list(np.random.choice(range(pop2_x.shape[0]), size=up_sample_pop_size - pop2_x.shape[0], replace = True))
+    random.shuffle(pop2_indices)
+
+    return pop1_x[pop1_indices], pop2_x[pop2_indices], pop1_y[pop1_indices], pop2_y[pop2_indices]
+
+def load_data_dros(msFile, ancFile, n_sites = 64, up_sample = False, up_sample_pop_size = 32):
     msFile = open(msFile, 'r')
     ancFile = open(ancFile, 'r')
 
@@ -577,8 +586,19 @@ def load_data_dros(msFile, ancFile, n_sites = 64):
 
         del anc_lines[:len(pos)]
 
-        x = x[2:,:n_sites]
-        y = y[2:,:n_sites]
+        pop1_x = x[:20, :n_sites]
+        pop2_x = x[20:, :n_sites]
+
+        pop1_y = y[:20, :n_sites]
+        pop2_y = y[20:, :n_sites]
+
+        if up_sample:
+            pop1_x, pop2_x, pop1_y, pop2_y = up_sample_populations(pop1_x, pop2_x, pop1_y, pop2_y, up_sample_pop_size = up_sample_pop_size)
+
+            x = np.vstack((pop1_x, pop2_x))
+            y = np.vstack((pop1_y, pop2_y))
+
+        print(x.shape, y.shape)
 
         X.append(x)
         Y.append(y)
