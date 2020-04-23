@@ -10,6 +10,8 @@ import copy
 import configparser
 from mpi4py import MPI
 
+from keras.utils import to_categorical
+
 def parse_args():
     # Argument Parser
     parser = argparse.ArgumentParser()
@@ -19,7 +21,15 @@ def parse_args():
     parser.add_argument("--format_config", default = "None")
 
     parser.add_argument("--two_channel", action = "store_true")
+
+    # specifies the population (0 or 1) to go in the output
+    # if None both go in a two channel image
+    parser.add_argument("--y_channel", default = "None")
+
+
     parser.add_argument("--sort_windows", action = "store_true")
+
+
 
     args = parser.parse_args()
 
@@ -81,7 +91,12 @@ def main():
 
                             X = copy.copy(_)
 
-                            y = add_channel(y[y.shape[0] // 2:, :])
+                            _ = np.zeros((y.shape[0] // 2, y.shape[1], 2))
+                            _[:, :, 0] = y[:y.shape[0] // 2, :]
+                            _[:, :, 1] = y[y.shape[0] // 2:, :]
+
+                            y = copy.copy(_)
+
 
                         X_window.append(X)
                         y_window.append(y)
@@ -109,7 +124,21 @@ def main():
 
                     X = copy.copy(_)
 
-                    y = add_channel(y[y.shape[0] // 2:, :])
+                    if args.y_channel == "None":
+                        _ = np.zeros((y.shape[0] // 2, y.shape[1], 2))
+                        _[:, :, 0] = y[:y.shape[0] // 2, :]
+                        _[:, :, 1] = y[y.shape[0] // 2:, :]
+
+                    else:
+                        _ = np.zeros((y.shape[0] // 2, y.shape[1], 1))
+
+                        if args.y_channel == "0":
+                            _[:, :, 0] = y[:y.shape[0] // 2, :]
+                        else:
+                            _[:, :, 0] = y[y.shape[0] // 2:, :]
+
+                    y = copy.copy(_)
+
 
                 X_new_batch.append(X)
                 y_new_batch.append(y)
