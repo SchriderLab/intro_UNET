@@ -10,7 +10,6 @@ import copy
 import configparser
 from mpi4py import MPI
 
-from keras.utils import to_categorical
 
 def parse_args():
     # Argument Parser
