@@ -29,7 +29,7 @@ def main():
     args = parse_args()
 
     # data, odir, tag, indices
-    cmd = 'sbatch --partition=volta-gpu  --gres=gpu:2 --time=2-00:00:00 --qos=gpu_access src/SLURM/run_training.sh architectures/var_size_two_channel/densenet169.json {0} {1} {2} 96 {3} training_configs/binary_crossentropy 2'
+    cmd = 'sbatch --partition=volta-gpu  --gres=gpu:2 --time=2-00:00:00 --qos=gpu_access src/SLURM/run_training.sh architectures/var_size_two_channel/densenet169.json {0} {1} {2} 32 {3} training_configs/binary_crossentropy 2'
 
     ifiles = os.listdir(args.idir_AB)
 
