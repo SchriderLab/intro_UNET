@@ -33,7 +33,7 @@ def main():
     # data, odir, tag, indices
     cmd = 'sbatch --partition=volta-gpu  --gres=gpu:2 --time=2-00:00:00 --qos=gpu_access src/SLURM/run_training.sh {4} {0} {1} {2} 32 {3} training_configs/binary_crossentropy 2'
 
-    ifiles = os.listdir(args.idir_AB)
+    ifiles = sorted(os.listdir(args.idir_AB))
 
     for ifile in ifiles:
         cmd_ = cmd.format(os.path.join(args.idir_AB, ifile) + "," + os.path.join(args.idir_BA, ifile), args.odir, ifile.split('.')[0], args.indices, args.architecture)
