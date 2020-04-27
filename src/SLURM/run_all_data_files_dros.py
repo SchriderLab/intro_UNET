@@ -11,6 +11,8 @@ def parse_args():
     parser.add_argument("--verbose", action="store_true", help="display messages")
     parser.add_argument("--idir_AB", default = "None")
     parser.add_argument("--idir_BA", default = "None")
+
+    parser.add_argument("--architecture", default = "architectures/var_size_2ch_to_2ch/densenet169.json")
     
     parser.add_argument("--odir", default = "None")
     parser.add_argument("--indices", default = "None")
@@ -29,12 +31,12 @@ def main():
     args = parse_args()
 
     # data, odir, tag, indices
-    cmd = 'sbatch --partition=volta-gpu  --gres=gpu:2 --time=2-00:00:00 --qos=gpu_access src/SLURM/run_training.sh architectures/var_size_2ch_to_2ch/densenet169.json {0} {1} {2} 32 {3} training_configs/binary_crossentropy 2'
+    cmd = 'sbatch --partition=volta-gpu  --gres=gpu:2 --time=2-00:00:00 --qos=gpu_access src/SLURM/run_training.sh {4} {0} {1} {2} 32 {3} training_configs/binary_crossentropy 2'
 
     ifiles = os.listdir(args.idir_AB)
 
     for ifile in ifiles:
-        cmd_ = cmd.format(os.path.join(args.idir_AB, ifile) + "," + os.path.join(args.idir_BA, ifile), args.odir, ifile.split('.')[0], args.indices)
+        cmd_ = cmd.format(os.path.join(args.idir_AB, ifile) + "," + os.path.join(args.idir_BA, ifile), args.odir, ifile.split('.')[0], args.indices, args.architecture)
         os.system(cmd_)
 
 if __name__ == '__main__':
