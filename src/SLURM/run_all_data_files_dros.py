@@ -31,7 +31,7 @@ def main():
     args = parse_args()
 
     # data, odir, tag, indices
-    cmd = 'sbatch --partition=volta-gpu  --gres=gpu:2 --time=2-00:00:00 --qos=gpu_access src/SLURM/run_training.sh {4} {0} {1} {2} 32 {3} training_configs/binary_crossentropy 2'
+    cmd = 'sbatch --partition=volta-gpu  --gres=gpu:1 --time=2-00:00:00 --qos=gpu_access src/SLURM/run_training.sh {4} {0} {1} {2} 32 {3} training_configs/binary_crossentropy 1'
 
     ifiles = sorted(os.listdir(args.idir_AB))
 
