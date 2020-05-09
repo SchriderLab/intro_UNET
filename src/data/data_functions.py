@@ -245,25 +245,25 @@ def get_windows(x, ipos, wsize = 500):
 
 # same idea as above function, but here the window size is fixed in terms of SNPs (128 SNPs) and
 # not base pairs
-def get_windows_snps(x, ipos):
+def get_windows_snps(x, ipos, N = 128):
     ipos = list(ipos)
 
     indices = range(x.shape[1])
     middle_index = findMiddle(indices)
 
-    indices = range(middle_index - 64, middle_index + 64)
+    indices = range(middle_index - N // 2, middle_index + N // 2)
     sets = []
 
     # kind of janky (but whatever)
-    # for a predictor image with width N, there 2N - 1 unique windows of size N that include one of those SNPs
-    for ix in indices[:63]:
-        sets.append(ipos[ix + 1 - 128:ix + 1])
+    # for a predictor image with width N, there 2N - 1 unique windows of size N that include at least one of those SNPs
+    for ix in indices[:(N // 2 - 1)]:
+        sets.append(ipos[ix + 1 - N:ix + 1])
 
     for ix in indices:
-        sets.append(ipos[ix - 64: ix + 64])
+        sets.append(ipos[ix - N // 2: ix + N // 2])
 
-    for ix in indices[64:]:
-        sets.append(ipos[ix:ix + 128])
+    for ix in indices[(N // 2):]:
+        sets.append(ipos[ix:ix + N])
 
     sets = [sorted(list(u)) for u in sets]
     sets = sorted(sets, key = lambda u: u[0])
@@ -586,11 +586,18 @@ def load_data_dros(msFile, ancFile, n_sites = 64, up_sample = False, up_sample_p
 
         del anc_lines[:len(pos)]
 
-        pop1_x = x[:20, :n_sites]
-        pop2_x = x[20:, :n_sites]
+        if n_sites is not None:
+            pop1_x = x[:20, :n_sites]
+            pop2_x = x[20:, :n_sites]
 
-        pop1_y = y[:20, :n_sites]
-        pop2_y = y[20:, :n_sites]
+            pop1_y = y[:20, :n_sites]
+            pop2_y = y[20:, :n_sites]
+        else:
+            pop1_x = x[:20, :]
+            pop2_x = x[20:, :]
+
+            pop1_y = y[:20, :]
+            pop2_y = y[20:, :]
 
         if up_sample:
             pop1_x, pop2_x, pop1_y, pop2_y = up_sample_populations(pop1_x, pop2_x, pop1_y, pop2_y, up_sample_pop_size = up_sample_pop_size)
