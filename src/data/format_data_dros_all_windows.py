@@ -64,7 +64,11 @@ def main():
         for k in range(len(x)):
 
             ipos = list(range(x[k].shape[1]))
-            windows, middle_indices = get_windows_snps(x[k], ipos, N = 64)
+
+            try:
+                windows, middle_indices = get_windows_snps(x[k], ipos, N = 64)
+            except:
+                continue
 
             X.append(x[k][:, middle_indices])
             Y.append(y[k][:, middle_indices])
@@ -83,7 +87,7 @@ def main():
         while len(X) > batch_size:
             if not args.no_channel:
                 x_data = add_channel(np.array(X[-batch_size:], dtype=np.uint8))
-                y_data = add_channel(np.array(y[-batch_size:], dtype=np.uint8))
+                y_data = add_channel(np.array(Y[-batch_size:], dtype=np.uint8))
 
                 x_window_data = add_channel(np.array(X_windows[-batch_size:], dtype = np.uint8))
                 y_window_data = add_channel(np.array(Y_windows[-batch_size:], dtype = np.uint8))
@@ -104,7 +108,7 @@ def main():
                 ofile.create_dataset('{0}/y_windows'.format(counter), data=y_window_data, compression = 'lzf')
 
             del X[-batch_size:]
-            del y[-batch_size:]
+            del Y[-batch_size:]
             del X_windows[-batch_size:]
             del Y_windows[-batch_size:]
 

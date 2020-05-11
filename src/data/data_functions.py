@@ -605,8 +605,6 @@ def load_data_dros(msFile, ancFile, n_sites = 64, up_sample = False, up_sample_p
             x = np.vstack((pop1_x, pop2_x))
             y = np.vstack((pop1_y, pop2_y))
 
-        print(x.shape, y.shape)
-
         X.append(x)
         Y.append(y)
 
