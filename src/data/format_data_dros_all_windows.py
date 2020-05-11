@@ -105,6 +105,8 @@ def main():
 
             del X[-batch_size:]
             del y[-batch_size:]
+            del X_windows[-batch_size:]
+            del Y_windows[-batch_size:]
 
             counter += 1
 
