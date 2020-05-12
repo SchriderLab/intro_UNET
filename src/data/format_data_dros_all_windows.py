@@ -5,6 +5,7 @@ import logging, argparse
 from data_functions import *
 
 import h5py
+import random
 
 import matplotlib.pyplot as plt
 
@@ -27,6 +28,8 @@ def parse_args():
     parser.add_argument("--up_sample", action = "store_true")
     parser.add_argument("--pop_size", default = "32")
 
+    parser.add_argument("--n_samples", default = "None")
+
     args = parser.parse_args()
 
     if args.verbose:
@@ -41,6 +44,10 @@ def main():
     args = parse_args()
 
     idirs = [os.path.join(args.idir, u) for u in os.listdir(args.idir) if args.direction in u]
+
+    if args.n_samples != "None":
+        n_dirs = int(args.n_samples) // 1000
+        idirs = random.sample(idirs, n_dirs)
 
     ofile = h5py.File(args.ofile, 'w')
 
