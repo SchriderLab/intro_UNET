@@ -4,8 +4,8 @@ import itertools
 
 import platform
 
-batch_sizes = [32, 64, 96]
-losses = ['mixed']
+batch_sizes = [24, 48, 96]
+losses = ['binary_crossentropy']
 
 config_dir = 'training_configs'
 
