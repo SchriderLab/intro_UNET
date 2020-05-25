@@ -13,6 +13,10 @@ def parse_args():
     parser.add_argument("--odir", default = "None")
     parser.add_argument("--indices", default = "None")
 
+    parser.add_argument("--architecture", default = "architectures/var_size_two_channel/densenet169.json")
+    parser.add_argument("--n_gpus", default = "2")
+    parser.add_argument("--batch_size", default = "96")
+
     args = parser.parse_args()
 
     if args.verbose:
@@ -27,12 +31,12 @@ def main():
     args = parse_args()
 
     # data, odir, tag, indices
-    cmd = 'sbatch --partition=volta-gpu  --gres=gpu:2 --time=2-00:00:00 --qos=gpu_access src/SLURM/run_training.sh architectures/var_size_two_channel/densenet169.json {0} {1} {2} 96 {3} training_configs/mixed 2'
+    cmd = 'sbatch --partition=volta-gpu  --gres=gpu:{6} --time=2-00:00:00 --qos=gpu_access src/SLURM/run_training.sh {4} {0} {1} {2} {5} {3} training_configs/mixed {6}'
 
     ifiles = os.listdir(args.idir)
 
     for ifile in ifiles:
-        cmd_ = cmd.format(os.path.join(args.idir, ifile), args.odir, ifile.split('.')[0], args.indices)
+        cmd_ = cmd.format(os.path.join(args.idir, ifile), args.odir, ifile.split('.')[0], args.indices, args.architecture, args.batch_size, args.n_gpus)
         os.system(cmd_)
 
 if __name__ == '__main__':
