@@ -39,6 +39,12 @@ import h5py
 def relu_clipped(x):
     return K.relu(x, max_value=1)
 
+def wbce( y_true, y_pred, weight1=0.98, weight0=0.02 ) :
+    y_true = K.clip(y_true, K.epsilon(), 1-K.epsilon())
+    y_pred = K.clip(y_pred, K.epsilon(), 1-K.epsilon())
+    logloss = -(y_true * K.log(y_pred) * weight1 + (1 - y_true) * K.log(1 - y_pred) * weight0 )
+    return K.mean( logloss, axis=-1)
+
 class TrainValTensorBoard(TensorBoard):
     def __init__(self, log_dir='./logs', **kwargs):
         # Make the original `TensorBoard` log to a subdirectory 'training'
@@ -135,6 +141,11 @@ def train_cnn_model(model, configFile, weightFileName, training_generator, valid
                       optimizer='adam',
                       metrics=['accuracy'])
 
+    elif config.get('optimizer_params', 'loss') == 'weighted_binary_crossentropy':
+        model.compile(loss=wbce,
+                      optimizer='adam',
+                      metrics=['accuracy'])
+
     # Tensor-board callback
     tbCallBack = TrainValTensorBoard(log_dir = tf_logdir, histogram_freq = 0, write_graph = True, write_images = True, write_grads = False, update_freq = 'epoch')
 
@@ -200,6 +211,7 @@ def parse_args():
     parser.add_argument("--weights", default = "None")
 
     parser.add_argument("--trim", default = "0")
+    parser.add_argument("--subtract_channel", action = "store_true")
 
     args = parser.parse_args()
 
@@ -274,7 +286,8 @@ def main():
     params = {'ifiles': ifiles,
         'n_inputs': n_inputs,
         'gen_size': gen_size,
-        'input_shapes': input_shapes
+        'input_shapes': input_shapes,
+        'subtract_channel': args.subtract_channel
         }
 
     print(params)
