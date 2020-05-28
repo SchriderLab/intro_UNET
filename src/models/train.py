@@ -39,7 +39,7 @@ import h5py
 def relu_clipped(x):
     return K.relu(x, max_value=1)
 
-def wbce( y_true, y_pred, weight1=0.98, weight0=0.02 ) :
+def wbce( y_true, y_pred, weight1=0.74, weight0=0.26 ) :
     y_true = K.clip(y_true, K.epsilon(), 1-K.epsilon())
     y_pred = K.clip(y_pred, K.epsilon(), 1-K.epsilon())
     logloss = -(y_true * K.log(y_pred) * weight1 + (1 - y_true) * K.log(1 - y_pred) * weight0 )
@@ -286,8 +286,7 @@ def main():
     params = {'ifiles': ifiles,
         'n_inputs': n_inputs,
         'gen_size': gen_size,
-        'input_shapes': input_shapes,
-        'subtract_channel': args.subtract_channel
+        'input_shapes': input_shapes
         }
 
     print(params)
