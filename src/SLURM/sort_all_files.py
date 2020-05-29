@@ -43,7 +43,7 @@ def main():
     ifiles = sorted(os.listdir(args.idir))
 
     for ifile in ifiles:
-        cmd_ = cmd.format(ifile, os.path.join(args.odir, ifile), args.format_config)
+        cmd_ = cmd.format(os.path.join(args.idir, ifile), os.path.join(args.odir, ifile), args.format_config)
         print(cmd_)
         os.system(cmd_)
 
