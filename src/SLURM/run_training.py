@@ -46,7 +46,7 @@ def main():
     # works on Longleaf
     cmd = 'sbatch --partition=volta-gpu  --gres=gpu:{7} --time=2-00:00:00 --qos=gpu_access src/SLURM/run_training.sh {0} {1} {2} {3} {4} {5} {6} {7}'
 
-    cmd_ = cmd.format(args.architecture, args.data, args.odir, args.tag, args.batch_size, args.indices, args.training_config, args.n_gpus)
+    cmd_ = cmd.format(args.architecture, data, args.odir, args.tag, args.batch_size, args.indices, args.training_config, args.n_gpus)
 
     print(cmd_)
     os.system(cmd_)
