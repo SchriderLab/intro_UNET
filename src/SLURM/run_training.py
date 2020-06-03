@@ -41,7 +41,7 @@ def main():
     if args.idir == "None":
         data = args.data
     else:
-        data = ','.join([os.path.join(args.idir, u) for u in os.listdir(args.idir)])
+        data = ','.join(sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir)]))
 
     # works on Longleaf
     cmd = 'sbatch --partition=volta-gpu  --gres=gpu:{7} --time=2-00:00:00 --qos=gpu_access src/SLURM/run_training.sh {0} {1} {2} {3} {4} {5} {6} {7}'
