@@ -44,7 +44,7 @@ def main():
 
     # should have an even number of pop1 to pop2 vs. pop2 to pop1
     # eventually we'll put in introgression both ways
-    cmd = 'sbatch -o {4} -t 2-00:00:00 --wrap "python3 src/data/runAndParseSlim.py src/data/introg_bidirectional.slim {0} 3000 {1} {2} 1> {3} {5} {6} {7}"'
+    cmd = 'sbatch -o {4} -t 2-00:00:00 --wrap "python3 src/data/runAndParseSlim.py src/data/introg_bidirectional.slim {0} 3000 {1} {2} 1> {3} {5} {6} {7} 1.0"'
 
     counter = 0
 
