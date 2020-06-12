@@ -16,7 +16,7 @@ def parse_args():
     parser.add_argument("--idir", default = "/proj/dschridelab/introgression_data/sims_raw_v1")
     parser.add_argument("--ofile", default = "None")
 
-    parser.add_argument("--format_mode", default = "sort_NN")
+    parser.add_argument("--format_mode", default = "None")
 
     parser.add_argument("--batch_size", default = "8")
 
@@ -26,6 +26,8 @@ def parse_args():
     parser.add_argument("--down_size", default = "0")
 
     parser.add_argument("--no_y", action = "store_true")
+    parser.add_argument("--no_channel", action = "store_true")
+    parser.add_argument("--transpose", action = "store_true")
 
     args = parser.parse_args()
 
@@ -62,8 +64,10 @@ def main():
         log = log_files[ix]
         out = out_files[ix]
 
+
         x, ipos, itarget, iintrog_reg = load_data(ms, log, int(args.n_sites), int(args.n_individuals))
         p = get_params(out)
+
 
         params.extend(p)
 
@@ -115,10 +119,21 @@ def main():
 
         while len(X) >= batch_size:
             logging.debug('root: making batch {0}'.format(counter))
+
+            if not args.no_channel:
+                x_data = add_channel(np.array(X[-batch_size:], dtype = np.uint8)[:,int(args.down_size):,:])
+                y_data = add_channel(np.array(y[-batch_size:], dtype=np.uint8)[:, int(args.down_size):, :])
+            else:
+                x_data = np.array(X[-batch_size:], dtype = np.uint8)[:,int(args.down_size):,:]
+                y_data = np.array(y[-batch_size:], dtype=np.uint8)[:, int(args.down_size):, :]
+
+            if args.transpose:
+                x_data = x_data.transpose(0, 2, 1)
+                y_data = y_data.transpose(0, 2, 1)
             
-            ofile.create_dataset('{0}/x_0'.format(counter), data = add_channel(np.array(X[-batch_size:], dtype = np.uint8)[:,int(args.down_size):,:]), compression = 'lzf')
+            ofile.create_dataset('{0}/x_0'.format(counter), data = x_data, compression = 'lzf')
             if not args.no_y:
-                ofile.create_dataset('{0}/y'.format(counter), data = add_channel(np.array(y[-batch_size:], dtype = np.uint8)[:,int(args.down_size):,:]), compression = 'lzf')
+                ofile.create_dataset('{0}/y'.format(counter), data = y_data, compression = 'lzf')
             ofile.create_dataset('{0}/params'.format(counter), data = np.array(params[-batch_size:]), dtype = np.float32, compression = 'lzf')
 
             del X[-batch_size:]
