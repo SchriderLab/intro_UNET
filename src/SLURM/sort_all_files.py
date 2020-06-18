@@ -33,7 +33,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    cmd = 'sbatch -n 24 -t 2-00:00:00 --wrap "mpirun -oversubscribe python3 src/data/sort_training_data.py --ifile {0} --ofile {1} --format_config {2} --two_channel --verbose"'
+    cmd = 'sbatch -n 24 -t 2-00:00:00 --wrap "mpirun -oversubscribe python3 src/data/sort_training_data.py --ifile {0} --ofile {1} --format_config {2} --two_channel --verbose'
 
     if args.archie:
         cmd = cmd + ' --y_channel 1"'
