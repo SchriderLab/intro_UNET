@@ -52,12 +52,15 @@ def main():
 
     for key in ifile.keys():
         features = list(np.array(ifile[key]['features']))
+
+        features = features.reshape((features.shape[0]*features.shape[1]*features.shape[2], features.shape[3]))
+
         indices = list(range(len(features)))
 
         indices = random.sample(indices, int(np.ceil(len(indices)*0.05)))
 
         for ix in indices:
-            ofile.write(','.join(features[ix]) + '\n')
+            ofile.write(','.join(list(map(str(features[ix])))) + '\n')
 
     ofile.close()
 
