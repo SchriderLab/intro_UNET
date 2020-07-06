@@ -51,7 +51,7 @@ def main():
     ofile = open(args.ofile, 'w')
 
     for key in ifile.keys():
-        features = list(np.array(ifile[key]['features']))
+        features = np.array(ifile[key]['features'])
 
         features = features.reshape((features.shape[0]*features.shape[1]*features.shape[2], features.shape[3]))
 
