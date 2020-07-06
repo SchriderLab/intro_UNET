@@ -60,7 +60,7 @@ def main():
         indices = random.sample(indices, int(np.ceil(len(indices)*0.05)))
 
         for ix in indices:
-            ofile.write(','.join(list(map(str(features[ix])))) + '\n')
+            ofile.write(','.join(list(map(str, features[ix]))) + '\n')
 
     ofile.close()
 
