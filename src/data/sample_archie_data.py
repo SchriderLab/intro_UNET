@@ -20,7 +20,7 @@ def parse_args():
     parser.add_argument("--ifile", default = "None")
     parser.add_argument("--ofile", default = "None")
 
-    parser.add_argument("--sample", default = "0.05")
+    parser.add_argument("--sample", default = "0.01")
 
     parser.add_argument("--odir", default = "None")
 
@@ -57,7 +57,7 @@ def main():
 
         indices = list(range(len(features)))
 
-        indices = random.sample(indices, int(np.ceil(len(indices)*0.05)))
+        indices = random.sample(indices, int(np.ceil(len(indices)*float(args.sample))))
 
         for ix in indices:
             ofile.write(','.join(list(map(str, features[ix]))) + '\n')
