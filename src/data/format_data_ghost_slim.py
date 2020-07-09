@@ -115,38 +115,8 @@ def main():
                 ipos = P[k]
                 y = itarget[k]
 
-                X = x[4:-4,:128]
-                Y = y[4:-4,:128]
-
-                if args.format_mode == 'sort_NN':
-                    X, indices = sort_NN(X)
-
-
-                elif args.format_mode == 'sort_NN_max':
-                    X, indices = sort_NN(X, method='max')
-
-                elif args.format_mode == 'min_match_sorted':
-                    X, indices = sort_cdist(X, opt='min', sort_pop=True)
-
-                elif args.format_mode == 'max_match_sorted':
-                    X, indices = sort_cdist(X, opt='max', sort_pop=True)
-
-                elif args.format_mode == 'min_match':
-                    X, indices = sort_cdist(X, opt='min', sort_pop=False)
-
-                elif args.format_mode == 'max_match':
-                    X, indices = sort_cdist(X, opt='max', sort_pop=False)
-
-                Y = Y[indices]
-
-                if args.two_channel:
-                    _ = np.zeros((X.shape[0] // 2, X.shape[1], 2))
-                    _[:,:,0] = X[:X.shape[0] // 2, :]
-                    _[:,:,1] = X[X.shape[0] // 2:, :]
-
-                    X = copy.copy(_)
-
-                    Y = add_channel(Y[Y.shape[0] // 2:, :])
+                X = x[:,:128]
+                Y = y[:,:128]
 
                 if Y.shape[1] == 128:
                     comm.send([X, Y, p[k]], dest = 0)
