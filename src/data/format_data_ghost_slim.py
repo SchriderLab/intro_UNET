@@ -118,8 +118,6 @@ def main():
                 X = x[:,:128]
                 Y = y[:,:128]
 
-                print(X.shape, Y.shape)
-
                 if Y.shape[1] == 128:
                     comm.send([X, Y, p[k]], dest = 0)
                 else:
