@@ -109,7 +109,7 @@ def main():
             X_data, P, itarget, iintrog_reg = load_data_ghost(ms, log, 128, int(args.n_individuals))
 
             for k in range(len(X_data)):
-                #logging.debug('{0}: working on file {1}, dataset {2}'.format(comm.rank, ix, k))
+                logging.debug('{0}: working on file {1}, dataset {2}'.format(comm.rank, ix, k))
 
                 x = X_data[k]
                 ipos = P[k]
@@ -117,6 +117,8 @@ def main():
 
                 X = x[:,:128]
                 Y = y[:,:128]
+
+                print(X.shape, Y.shape)
 
                 if Y.shape[1] == 128:
                     comm.send([X, Y, p[k]], dest = 0)
