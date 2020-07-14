@@ -97,6 +97,7 @@ def main():
     out_files = sorted([os.path.join(args.idir, u) for u in os.listdir(args.idir) if '.out' in u])
 
     n_sims = int(args.n_per_file)*len(ms_files)
+    logging.debug('0: have {0} sims'.format(n_sims))
 
     if comm.rank != 0:
         for ix in range(comm.rank - 1, len(ms_files), comm.size - 1):
