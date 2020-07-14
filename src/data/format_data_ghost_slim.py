@@ -109,8 +109,6 @@ def main():
             X_data, P, itarget, iintrog_reg = load_data_ghost(ms, log, 128, int(args.n_individuals))
 
             for k in range(len(X_data)):
-                logging.debug('{0}: working on file {1}, dataset {2}'.format(comm.rank, ix, k))
-
                 x = X_data[k]
                 ipos = P[k]
                 y = itarget[k]
@@ -140,7 +138,7 @@ def main():
 
             n_recieved += 1
 
-            if n_recieved % 10 == 0:
+            if n_recieved % 100 == 0:
                 logging.debug('0: recieved {0} simulations'.format(n_recieved))
 
             if not args.zero_check:
