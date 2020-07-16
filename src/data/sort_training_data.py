@@ -176,7 +176,9 @@ def main():
 
             ofile.create_dataset(str(key) + '/x_0', data=X_batch, compression='lzf')
             ofile.create_dataset(str(key) + '/y', data=y_batch, compression='lzf')
-            ofile.create_dataset(str(key) + '/params', data = np.array(ifile[key]['params'], dtype = np.float32))
+
+            if 'params' in list(ifile[key].keys()):
+                ofile.create_dataset(str(key) + '/params', data = np.array(ifile[key]['params'], dtype = np.float32))
 
             n_received += 1
 
