@@ -10,6 +10,7 @@ import copy
 import configparser
 from mpi4py import MPI
 
+import time
 
 def parse_args():
     # Argument Parser
@@ -24,11 +25,7 @@ def parse_args():
     # specifies the population (0 or 1) to go in the output
     # if None both go in a two channel image
     parser.add_argument("--y_channel", default = "None")
-
-
     parser.add_argument("--sort_windows", action = "store_true")
-
-
 
     args = parser.parse_args()
 
@@ -56,7 +53,6 @@ def main():
     if comm.rank != 0:
         for ix in range(comm.rank - 1, len(keys), comm.size - 1):
             key = keys[ix]
-            print(key)
 
             logging.debug('{0}: working on key {1} of {2}'.format(comm.rank, ix + 1, len(keys)))
 
@@ -77,6 +73,7 @@ def main():
                     y_window = []
                     ix = []
 
+                    start = time.time()
                     for j in range(X_window_batch.shape[1]):
                         X = copy.copy(X_window_batch[k, j, :, :, 0])
                         y = copy.copy(y_window_batch[k, j, :, :, 0])
@@ -90,16 +87,30 @@ def main():
 
                             X = copy.copy(_)
 
-                            _ = np.zeros((y.shape[0] // 2, y.shape[1], 2))
-                            _[:, :, 0] = y[:y.shape[0] // 2, :]
-                            _[:, :, 1] = y[y.shape[0] // 2:, :]
+                            if args.y_channel == "None":
+                                _ = np.zeros((y.shape[0] // 2, y.shape[1], 2))
+                                _[:, :, 0] = y[:y.shape[0] // 2, :]
+                                _[:, :, 1] = y[y.shape[0] // 2:, :]
+
+                            else:
+                                _ = np.zeros((y.shape[0] // 2, y.shape[1], 1))
+
+                                if args.y_channel == "0":
+                                    _[:, :, 0] = y[:y.shape[0] // 2, :]
+                                else:
+                                    _[:, :, 0] = y[y.shape[0] // 2:, :]
 
                             y = copy.copy(_)
 
-
                         X_window.append(X)
                         y_window.append(y)
-                        ix.append(i2)
+
+                        if args.y_channel == "None" or args.y_channel == "1":
+                            ix.append(i2)
+                        else:
+                            ix.append(i1)
+
+                    end = time.time()
 
                     X_window_new_batch.append(np.array(X_window, dtype = np.uint8))
                     y_window_new_batch.append(np.array(y_window, dtype = np.uint8))
@@ -144,9 +155,9 @@ def main():
 
             if args.sort_windows:
                 comm.send([np.array(X_new_batch, dtype=np.uint8), np.array(y_new_batch, dtype=np.uint8),
-                           np.array(X_window_new_batch, dtype = np.uint8), np.array(y_window_new_batch, dtype = np.uint8), np.array(indices, dtype = np.uint8)], dest=0)
+                           np.array(X_window_new_batch, dtype = np.uint8), np.array(y_window_new_batch, dtype = np.uint8), np.array(indices, dtype = np.uint8), key], dest=0)
             else:
-                comm.send([np.array(X_new_batch, dtype = np.uint8), np.array(y_new_batch, dtype = np.uint8)], dest=0)
+                comm.send([np.array(X_new_batch, dtype = np.uint8), np.array(y_new_batch, dtype = np.uint8), key], dest=0)
 
     else:
         ofile = h5py.File(args.ofile, 'w')
@@ -155,16 +166,17 @@ def main():
 
         while n_received < len(keys):
             if not args.sort_windows:
-                X_batch, y_batch = comm.recv(source = MPI.ANY_SOURCE)
+                X_batch, y_batch, key = comm.recv(source = MPI.ANY_SOURCE)
             else:
-                X_batch, y_batch, X_window_batch, y_window_batch, indices = comm.recv(source = MPI.ANY_SOURCE)
+                X_batch, y_batch, X_window_batch, y_window_batch, indices, key = comm.recv(source = MPI.ANY_SOURCE)
 
-                ofile.create_dataset(str(n_received) + '/x_windows', data=X_window_batch, compression='lzf')
-                ofile.create_dataset(str(n_received) + '/y_windows', data=y_window_batch, compression='lzf')
-                ofile.create_dataset(str(n_received) + '/indices', data=indices, compression='lzf')
+                ofile.create_dataset(str(key) + '/x_windows', data=X_window_batch, compression='lzf')
+                ofile.create_dataset(str(key) + '/y_windows', data=y_window_batch, compression='lzf')
+                ofile.create_dataset(str(key) + '/indices', data=indices, compression='lzf')
 
-            ofile.create_dataset(str(n_received) + '/x_0', data=X_batch, compression='lzf')
-            ofile.create_dataset(str(n_received) + '/y', data=y_batch, compression='lzf')
+            ofile.create_dataset(str(key) + '/x_0', data=X_batch, compression='lzf')
+            ofile.create_dataset(str(key) + '/y', data=y_batch, compression='lzf')
+            ofile.create_dataset(str(key) + '/params', data = np.array(ifile[key]['params'], dtype = np.float32))
 
             n_received += 1
 
