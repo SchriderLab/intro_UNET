@@ -126,9 +126,9 @@ def main():
                     # make 4 files for each window
                     w = windows[i]
 
-                    x_ = x[4:-4, w]
+                    x_ = x[:, w]
                     ipos_ = ipos[w]
-                    y_ = y[4:-4, w]
+                    y_ = y[:, w]
 
                     pos = np.zeros(len(middle_pos), dtype=np.uint8)
 
@@ -143,7 +143,7 @@ def main():
                 X = np.array(X, dtype = np.uint8)
                 Y = np.array(Y, dtype = np.uint8)
 
-                comm.send([X, Y, positions, p[k], x[4:-4,middle_indices], y[4:-4,middle_indices]], dest = 0)
+                comm.send([X, Y, positions, p[k], x[:,middle_indices], y[:,middle_indices]], dest = 0)
     else:
         ofile = h5py.File(args.ofile, 'w')
 
